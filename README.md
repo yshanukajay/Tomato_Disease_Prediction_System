@@ -1,2 +1,2 @@
-# tomato_disease_project
-tomato_disease_prediction_project
+# Tomato_Disease_Prediction_System
+Tomato_Disease_Prediction_System
