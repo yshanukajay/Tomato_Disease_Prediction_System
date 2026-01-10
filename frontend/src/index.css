@@ -1,0 +1,121 @@
+body {
+	margin: 0;
+	font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	overflow-x: hidden;
+}
+
+code {
+	font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Professional Dropzone Styling with Glass Morphism */
+.MuiDropzoneArea-root {
+	background: rgba(255, 255, 255, 0.1) !important;
+	backdrop-filter: blur(10px) !important;
+	border: 2px dashed rgba(255, 255, 255, 0.3) !important;
+	border-radius: 16px !important;
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	min-height: 220px !important;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+.MuiDropzoneArea-root:hover {
+	border-color: rgba(33, 150, 243, 0.8) !important;
+	background: rgba(255, 255, 255, 0.2) !important;
+	transform: translateY(-4px) scale(1.02) !important;
+	box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15) !important;
+}
+
+.MuiDropzoneArea-text {
+	color: rgba(255, 255, 255, 0.9) !important;
+	font-weight: 600 !important;
+	font-size: 18px !important;
+	text-align: center !important;
+	margin: 20px 0 !important;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.MuiDropzoneArea-icon {
+	color: rgba(255, 255, 255, 0.8) !important;
+	font-size: 64px !important;
+	margin-bottom: 20px !important;
+	filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2)) !important;
+}
+
+/* Enhanced Loading Animation */
+@keyframes modernPulse {
+	0% { 
+		transform: scale(1) rotate(0deg);
+		box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7);
+	}
+	50% { 
+		transform: scale(1.05) rotate(180deg);
+		box-shadow: 0 0 0 10px rgba(33, 150, 243, 0);
+	}
+	100% { 
+		transform: scale(1) rotate(360deg);
+		box-shadow: 0 0 0 0 rgba(33, 150, 243, 0);
+	}
+}
+
+.MuiCircularProgress-root {
+	animation: modernPulse 3s infinite !important;
+}
+
+/* Glass Morphism Effects */
+.MuiCard-root {
+	backdrop-filter: blur(20px) !important;
+	background: rgba(255, 255, 255, 0.95) !important;
+	border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Professional Smooth Transitions */
+* {
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Custom Professional Scrollbars */
+::-webkit-scrollbar {
+	width: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.3);
+	border-radius: 10px;
+	backdrop-filter: blur(10px);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.5);
+}
+
+/* Professional Focus States */
+.MuiButton-root:focus {
+	outline: 2px solid rgba(33, 150, 243, 0.5) !important;
+	outline-offset: 2px !important;
+}
+
+/* Enhanced Table Styling */
+.MuiTableContainer-root {
+	backdrop-filter: blur(10px) !important;
+	background: rgba(255, 255, 255, 0.05) !important;
+	border-radius: 12px !important;
+}
+
+/* Mobile Responsive Enhancements */
+@media (max-width: 768px) {
+	.MuiDropzoneArea-text {
+		font-size: 16px !important;
+	}
+	
+	.MuiDropzoneArea-icon {
+		font-size: 48px !important;
+	}
+}
