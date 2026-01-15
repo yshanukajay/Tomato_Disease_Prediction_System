@@ -103,4 +103,4 @@ MIT License
 
 ## Author
 
-Yashodha Shanuka Jayasinghe ([@yshanukajay](https://github.com/yshanukajay))
+Yohan Shanuka Jayakody ([@yshanukajay](https://github.com/yshanukajay))
