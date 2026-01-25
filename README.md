@@ -1,4 +1,4 @@
-# Tomato Disease Prediction System
+# Tomo Vision
 
 A machine learning application that predicts tomato plant diseases from leaf images using deep learning. 
 

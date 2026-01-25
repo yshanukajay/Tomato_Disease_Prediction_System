@@ -95,6 +95,132 @@ const ColorButton = withStyles((theme) => ({
 }))(Button);
 
 const useStyles = makeStyles((theme) => ({
+  heroBanner: {
+    textAlign: 'center',
+    padding: '60px 24px 40px',
+    background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(76, 175, 80, 0.03) 100%)',
+    animation: 'fadeIn 1s ease-out',
+  },
+  heroTitle: {
+    fontWeight: 800,
+    color: '#ffffff',
+    marginBottom: '16px',
+    textShadow: '0 4px 20px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2)',
+    letterSpacing: '-0.5px',
+  },
+  heroSubtitle: {
+    color: 'rgba(255,255,255,0.95)',
+    fontWeight: 500,
+    textShadow: '0 2px 12px rgba(0,0,0,0.3)',
+  },
+  featureCard: {
+    background: 'linear-gradient(145deg, rgba(255,255,255,0.95), rgba(248,251,248,0.95))',
+    backdropFilter: 'blur(20px)',
+    borderRadius: '20px',
+    padding: '28px 20px',
+    textAlign: 'center',
+    border: '2px solid rgba(76, 175, 80, 0.2)',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+    '&:hover': {
+      transform: 'translateY(-8px)',
+      boxShadow: '0 16px 48px rgba(76, 175, 80, 0.25)',
+      borderColor: 'rgba(76, 175, 80, 0.4)',
+    },
+  },
+  featureIcon: {
+    fontSize: '42px',
+    marginBottom: '12px',
+  },
+  featureTitle: {
+    fontSize: '16px',
+    fontWeight: 700,
+    color: '#1b5e20',
+    marginBottom: '6px',
+  },
+  featureText: {
+    fontSize: '13px',
+    color: '#546e7a',
+    fontWeight: 500,
+  },
+  customDropzone: {
+    minHeight: '180px !important',
+    border: '3px dashed rgba(76, 175, 80, 0.3) !important',
+    borderRadius: '16px !important',
+    background: 'linear-gradient(135deg, rgba(248,251,248,0.5), rgba(240,248,245,0.5)) !important',
+    transition: 'all 0.3s ease !important',
+    '&:hover': {
+      borderColor: 'rgba(76, 175, 80, 0.6) !important',
+      background: 'linear-gradient(135deg, rgba(248,251,248,0.8), rgba(240,248,245,0.8)) !important',
+    },
+  },
+  loadingContainer: {
+    textAlign: 'center',
+    padding: '48px 32px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '20px',
+  },
+  loadingTitle: {
+    fontSize: '24px',
+    fontWeight: 700,
+    color: '#1b5e20',
+    marginTop: '20px',
+  },
+  loadingSubtitle: {
+    fontSize: '15px',
+    color: '#546e7a',
+    fontWeight: 500,
+  },
+  loadingSteps: {
+    marginTop: '32px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+    alignItems: 'flex-start',
+    width: '100%',
+    maxWidth: '320px',
+  },
+  loadingStep: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  loadingStepIcon: {
+    width: '28px',
+    height: '28px',
+    borderRadius: '50%',
+    background: 'linear-gradient(135deg, #4caf50, #66bb6a)',
+    color: 'white',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '14px',
+    fontWeight: 700,
+    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
+  },
+  loadingStepIconPending: {
+    width: '28px',
+    height: '28px',
+    borderRadius: '50%',
+    background: '#e0e0e0',
+    color: '#9e9e9e',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '20px',
+  },
+  loadingStepText: {
+    fontSize: '15px',
+    color: '#1b5e20',
+    fontWeight: 600,
+  },
+  loadingStepTextPending: {
+    fontSize: '15px',
+    color: '#9e9e9e',
+    fontWeight: 500,
+  },
   grow: {
     flexGrow: 1,
   },
@@ -120,10 +246,10 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   media: {
-    height: 400,
+    height: 420,
     borderRadius: "30px 30px 0 0",
     position: 'relative',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+    boxShadow: '0 6px 24px rgba(0,0,0,0.15)',
     '&::after': {
       content: '""',
       position: 'absolute',
@@ -131,7 +257,7 @@ const useStyles = makeStyles((theme) => ({
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.05) 100%)',
+      background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.04) 100%)',
       pointerEvents: 'none',
     },
   },
@@ -144,8 +270,8 @@ const useStyles = makeStyles((theme) => ({
   },
   gridContainer: {
     justifyContent: "center",
-    padding: "2em 1em",
-    minHeight: "calc(100vh - 80px)",
+    padding: "3em 1.5em",
+    minHeight: "calc(100vh - 90px)",
     display: "flex",
     alignItems: "center",
   },
@@ -173,17 +299,64 @@ const useStyles = makeStyles((theme) => ({
       zIndex: 1,
     },
   },
+  diseasesCard: {
+    margin: "auto",
+    maxWidth: 520,
+    marginBottom: 28,
+    padding: theme.spacing(4),
+    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 251, 248, 0.98) 100%)',
+    backdropFilter: 'blur(25px)',
+    boxShadow: '0 12px 48px rgba(76, 175, 80, 0.2), 0 2px 8px rgba(0,0,0,0.08)',
+    borderRadius: '28px',
+    border: '3px solid rgba(76, 175, 80, 0.25)',
+    position: 'relative',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: '4px',
+      background: 'linear-gradient(90deg, #2e7d32 0%, #4caf50 50%, #66bb6a 100%)',
+      borderRadius: '28px 28px 0 0',
+    },
+  },
+  diseasesTitle: {
+    color: '#1b5e20',
+    fontWeight: 800,
+    marginBottom: theme.spacing(2.5),
+    fontSize: '1.35rem',
+    letterSpacing: '0.5px',
+  },
+  diseaseItem: {
+    color: '#37474f',
+    fontSize: '1rem',
+    lineHeight: 2.2,
+    fontWeight: 600,
+    display: 'flex',
+    alignItems: 'center',
+    '&::before': {
+      content: '""',
+      display: 'inline-block',
+      width: '6px',
+      height: '6px',
+      borderRadius: '50%',
+      background: '#4caf50',
+      marginRight: '12px',
+      marginLeft: '-2px',
+    },
+  },
   imageCard: {
     margin: "auto",
-    maxWidth: 500,
-    minHeight: 400,
+    maxWidth: 520,
+    minHeight: 420,
     background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(249, 251, 248, 0.98) 100%)',
-    backdropFilter: 'blur(20px)',
-    boxShadow: '0 20px 60px rgba(0,0,0,0.3), 0 0 0 2px rgba(76, 175, 80, 0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
+    backdropFilter: 'blur(25px)',
+    boxShadow: '0 24px 72px rgba(0,0,0,0.18), 0 4px 16px rgba(76, 175, 80, 0.15), inset 0 1px 0 rgba(255,255,255,0.9)',
     borderRadius: '32px',
-    transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+    transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
     overflow: "hidden",
-    border: '2px solid transparent',
+    border: '3px solid transparent',
     backgroundImage: 'linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(249, 251, 248, 0.98)), linear-gradient(135deg, #4caf50 0%, #66bb6a 25%, #81c784 50%, #aed581 75%, #4caf50 100%)',
     backgroundOrigin: 'border-box',
     backgroundClip: 'padding-box, border-box',
@@ -196,17 +369,17 @@ const useStyles = makeStyles((theme) => ({
       right: 0,
       bottom: 0,
       borderRadius: '32px',
-      padding: '2px',
+      padding: '3px',
       background: 'linear-gradient(135deg, #4caf50, #66bb6a, #81c784, #aed581)',
       WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
       WebkitMaskComposite: 'xor',
       maskComposite: 'exclude',
-      opacity: 0.6,
-      animation: 'borderRotate 4s linear infinite',
+      opacity: 0.5,
+      animation: 'borderRotate 5s linear infinite',
     },
     '&:hover': {
-      transform: "translateY(-12px) scale(1.03)",
-      boxShadow: '0 30px 80px rgba(76, 175, 80, 0.4), 0 0 40px rgba(102, 187, 106, 0.3), inset 0 1px 0 rgba(255,255,255,1)',
+      transform: "translateY(-16px) scale(1.02)",
+      boxShadow: '0 32px 96px rgba(76, 175, 80, 0.35), 0 8px 32px rgba(102, 187, 106, 0.25), inset 0 1px 0 rgba(255,255,255,1)',
       '&::before': {
         opacity: 1,
       },
@@ -330,29 +503,43 @@ const useStyles = makeStyles((theme) => ({
     boxShadow: 'inset 0 2px 8px rgba(76, 175, 80, 0.1)',
   },
   appbar: {
-    background: "linear-gradient(135deg, rgba(56, 142, 60, 0.95) 0%, rgba(76, 175, 80, 0.95) 100%)",
-    backdropFilter: "blur(20px)",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+    background: "linear-gradient(135deg, rgba(46, 125, 50, 0.98) 0%, rgba(56, 142, 60, 0.98) 50%, rgba(76, 175, 80, 0.98) 100%)",
+    backdropFilter: "blur(25px)",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.1)",
     color: 'white',
-    height: "80px",
+    height: "90px",
     justifyContent: "center",
-    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    borderBottom: "2px solid rgba(255,255,255,0.15)",
   },
   toolbar: {
-    height: "80px",
-    padding: "0 32px",
+    height: "90px",
+    padding: "0 40px",
+    maxWidth: '1400px',
+    width: '100%',
+    margin: '0 auto',
   },
   title: {
-    fontSize: "24px",
-    fontWeight: 700,
+    fontSize: "20px",
+    fontWeight: 800,
     fontFamily: "'Inter', 'Poppins', sans-serif",
-    letterSpacing: "0.5px",
+    letterSpacing: "0.3px",
+    lineHeight: 1.2,
+  },
+  logoContainer: {
+    background: 'white',
+    borderRadius: '14px',
+    padding: '6px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.2), 0 0 0 3px rgba(255,255,255,0.2)',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      boxShadow: '0 12px 32px rgba(0,0,0,0.3), 0 0 0 3px rgba(255,255,255,0.3)',
+    },
   },
   logo: {
-    width: 50,
-    height: 50,
-    border: "3px solid rgba(255,255,255,0.3)",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    width: 56,
+    height: 56,
+    border: 'none',
   },
   loader: {
     color: '#2196f3',
@@ -364,13 +551,13 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '18px',
   },
   dropzoneContainer: {
-    padding: "48px 32px",
-    minHeight: "320px",
+    padding: "56px 40px",
+    minHeight: "400px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    background: "linear-gradient(135deg, rgba(248,250,252,0.95) 0%, rgba(241,245,249,0.95) 50%, rgba(237,242,250,0.95) 100%)",
+    background: "linear-gradient(135deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.98) 50%, rgba(237,242,250,0.98) 100%)",
     backdropFilter: "blur(20px)",
     borderRadius: "28px",
     margin: "20px",
@@ -389,16 +576,16 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 700,
   },
   resultCard: {
-    background: "linear-gradient(135deg, rgba(232,245,232,0.95) 0%, rgba(241,248,233,0.95) 50%, rgba(225,245,254,0.95) 100%)",
-    backdropFilter: "blur(20px)",
-    borderRadius: "20px",
-    padding: "32px",
-    margin: "20px 0",
-    border: "2px solid transparent",
-    backgroundImage: 'linear-gradient(135deg, rgba(232,245,232,0.95), rgba(241,248,233,0.95)), linear-gradient(135deg, #4caf50, #8bc34a, #4caf50)',
+    background: "linear-gradient(135deg, rgba(232,245,232,0.98) 0%, rgba(241,248,233,0.98) 50%, rgba(225,245,254,0.98) 100%)",
+    backdropFilter: "blur(25px)",
+    borderRadius: "24px",
+    padding: "40px",
+    margin: "24px 0",
+    border: "3px solid transparent",
+    backgroundImage: 'linear-gradient(135deg, rgba(232,245,232,0.98), rgba(241,248,233,0.98)), linear-gradient(135deg, #4caf50, #8bc34a, #4caf50)',
     backgroundOrigin: 'border-box',
     backgroundClip: 'padding-box, border-box',
-    boxShadow: "0 12px 40px rgba(76, 175, 80, 0.25), 0 0 20px rgba(139, 195, 74, 0.15)",
+    boxShadow: "0 16px 56px rgba(76, 175, 80, 0.3), 0 4px 16px rgba(139, 195, 74, 0.2)",
     position: 'relative',
     animation: 'resultGlow 2s ease-in-out infinite alternate',
   },
@@ -413,12 +600,12 @@ const useStyles = makeStyles((theme) => ({
     textTransform: "uppercase",
   },
   diseaseInfoCard: {
-    background: "linear-gradient(135deg, rgba(255,255,255,0.99) 0%, rgba(249,251,248,0.99) 100%)",
-    borderRadius: "24px",
-    padding: "32px",
-    marginTop: "28px",
-    border: "2px solid rgba(76, 175, 80, 0.15)",
-    boxShadow: "0 10px 40px rgba(76, 175, 80, 0.2), 0 1px 3px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)",
+    background: "linear-gradient(135deg, rgba(255,255,255,0.99) 0%, rgba(248,251,248,0.99) 100%)",
+    borderRadius: "28px",
+    padding: "36px",
+    marginTop: "32px",
+    border: "3px solid rgba(76, 175, 80, 0.2)",
+    boxShadow: "0 12px 48px rgba(76, 175, 80, 0.25), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)",
     animation: "slideInUp 0.6s ease-out",
     position: 'relative',
     '&::before': {
@@ -427,9 +614,9 @@ const useStyles = makeStyles((theme) => ({
       top: 0,
       left: 0,
       right: 0,
-      height: '4px',
+      height: '5px',
       background: 'linear-gradient(90deg, #2e7d32 0%, #4caf50 50%, #66bb6a 100%)',
-      borderRadius: '24px 24px 0 0',
+      borderRadius: '28px 28px 0 0',
     },
   },
   infoSection: {
@@ -605,36 +792,95 @@ export const ImageUpload = () => {
     <React.Fragment>
       <AppBar position="static" className={classes.appbar}>
         <Toolbar className={classes.toolbar}>
-          <Typography className={classes.title} variant="h5" noWrap>
-            Tomato Plant Disease Detection & Diagnosis System
-          </Typography>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div className={classes.logoContainer}>
+              <Avatar src="/cblogo.PNG.png" className={classes.logo}></Avatar>
+            </div>
+            <div>
+              <div style={{
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '2px',
+                color: 'rgba(255,255,255,0.9)',
+                marginBottom: '2px'
+              }}>
+                🌱 TOMO VISION
+              </div>
+              <Typography className={classes.title} variant="h5" noWrap>
+                Tomato Disease Detection
+              </Typography>
+            </div>
+          </div>
           <div className={classes.grow} />
           <Chip
             icon={<AutorenewIcon style={{ animation: 'spin 3s linear infinite' }} />}
-            label="AI-Powered Detection"
+            label="AI-Powered"
             style={{
               background: 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%)',
               backdropFilter: 'blur(10px)',
               color: 'white',
               fontWeight: 700,
               fontSize: '13px',
-              padding: '6px 12px',
+              padding: '6px 14px',
               height: '36px',
-              marginRight: '16px',
               border: '1px solid rgba(255,255,255,0.3)',
               boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
               transition: 'all 0.3s ease',
-              '&:hover': {
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.25) 100%)',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 6px 16px rgba(0,0,0,0.2)',
-              }
             }}
           />
-          <Avatar src="/cblogo.PNG.png" className={classes.logo}></Avatar>
+          <Chip
+            label="Ready"
+            style={{
+              background: 'rgba(139, 195, 74, 0.3)',
+              backdropFilter: 'blur(10px)',
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '13px',
+              padding: '6px 14px',
+              height: '36px',
+              marginLeft: '10px',
+              border: '1px solid rgba(255,255,255,0.3)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            }}
+          />
         </Toolbar>
       </AppBar>
       <Container maxWidth={false} className={classes.mainContainer} disableGutters={true}>
+        {!image && !data && (
+          <Fade in={true} timeout={800}>
+            <div className={classes.heroBanner}>
+              <Typography variant="h3" className={classes.heroTitle}>
+                AI-Powered Disease Detection
+              </Typography>
+              <Typography variant="h6" className={classes.heroSubtitle}>
+                Get instant, accurate diagnosis for your tomato plants
+              </Typography>
+              <Grid container spacing={3} style={{ marginTop: '32px', maxWidth: '900px', margin: '32px auto 0' }}>
+                <Grid item xs={12} sm={4}>
+                  <div className={classes.featureCard}>
+                    <div className={classes.featureIcon}>🎯</div>
+                    <Typography className={classes.featureTitle}>High Accuracy</Typography>
+                    <Typography className={classes.featureText}>95%+ detection rate</Typography>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <div className={classes.featureCard}>
+                    <div className={classes.featureIcon}>⚡</div>
+                    <Typography className={classes.featureTitle}>Instant Results</Typography>
+                    <Typography className={classes.featureText}>Analysis in seconds</Typography>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <div className={classes.featureCard}>
+                    <div className={classes.featureIcon}>🌱</div>
+                    <Typography className={classes.featureTitle}>Expert Care Tips</Typography>
+                    <Typography className={classes.featureText}>Treatment guidance</Typography>
+                  </div>
+                </Grid>
+              </Grid>
+            </div>
+          </Fade>
+        )}
         <Grid
           className={classes.gridContainer}
           container
@@ -644,6 +890,25 @@ export const ImageUpload = () => {
           spacing={3}
         >
           <Grid item xs={12} md={8} lg={6}>
+            {!image && <Fade in={true} timeout={600}>
+              <Paper className={classes.diseasesCard}>
+                <Typography variant="h6" className={classes.diseasesTitle}>
+                  🔬 Detectable Conditions
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={6}>
+                    <Typography className={classes.diseaseItem}>• Tomato Bacterial Spot</Typography>
+                    <Typography className={classes.diseaseItem}>• Tomato Early Blight</Typography>
+                    <Typography className={classes.diseaseItem}>• Tomato Late Blight</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <Typography className={classes.diseaseItem}>• Tomato Leaf Mold</Typography>
+                    <Typography className={classes.diseaseItem}>• Tomato Target Spot</Typography>
+                    <Typography className={classes.diseaseItem}>• Healthy Tomato</Typography>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Fade>}
             <Zoom in={true} timeout={500}>
               <Card className={`${classes.imageCard} ${!image ? classes.imageCardEmpty : ''}`}>
                 {image && <Fade in={true} timeout={800}>
@@ -658,23 +923,85 @@ export const ImageUpload = () => {
                 </Fade>
                 }
                 {!image && <CardContent className={classes.dropzoneContainer}>
+                  <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📸</div>
+                    <Typography variant="h6" style={{
+                      color: '#2e7d32',
+                      fontWeight: 700,
+                      marginBottom: '8px'
+                    }}>
+                      Upload Leaf Image
+                    </Typography>
+                    <Typography variant="body2" style={{
+                      color: '#546e7a',
+                      fontSize: '14px',
+                      maxWidth: '380px',
+                      margin: '0 auto'
+                    }}>
+                      Drag and drop or click to select a clear image of a tomato leaf
+                    </Typography>
+                  </div>
                   <DropzoneArea
                     acceptedFiles={['image/*']}
-                    dropzoneText={"📸 Drag and drop an image of a tomato plant leaf or click to upload"}
+                    dropzoneText={""}
                     onChange={onSelectFile}
                     maxFileSize={5000000}
                     showFileNames={true}
                     showAlerts={true}
                     filesLimit={1}
+                    dropzoneClass={classes.customDropzone}
                   />
-                  <Typography variant="body2" style={{
-                    color: '#78909c',
-                    marginTop: '24px',
-                    textAlign: 'center',
-                    fontSize: '14px'
+                  <div style={{
+                    marginTop: '28px',
+                    padding: '16px 24px',
+                    background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.08), rgba(139, 195, 74, 0.08))',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(76, 175, 80, 0.2)'
                   }}>
-                    💡 Tip: For best results, upload clear images of individual leaves with good lighting
-                  </Typography>
+                    <Typography variant="body2" style={{
+                      color: '#2e7d32',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      marginBottom: '8px'
+                    }}>
+                      💡 Pro Tips for Best Results:
+                    </Typography>
+                    <Typography variant="body2" style={{
+                      color: '#546e7a',
+                      fontSize: '12px',
+                      lineHeight: 1.8
+                    }}>
+                      • Use good natural or artificial lighting<br />
+                      • Focus on a single leaf for clarity<br />
+                      • Capture both sides if symptoms vary<br />
+                      • Avoid blurry or out-of-focus images
+                    </Typography>
+                  </div>
+                </CardContent>}
+                {isLoading && !data && image && <CardContent className={classes.detail}>
+                  <div className={classes.loadingContainer}>
+                    <CircularProgress size={80} thickness={4} style={{ color: '#4caf50' }} />
+                    <Typography className={classes.loadingTitle}>
+                      Analyzing Leaf Image...
+                    </Typography>
+                    <Typography className={classes.loadingSubtitle}>
+                      Our AI model is examining the leaf for diseases
+                    </Typography>
+                    <div className={classes.loadingSteps}>
+                      <div className={classes.loadingStep}>
+                        <div className={classes.loadingStepIcon}>✓</div>
+                        <Typography className={classes.loadingStepText}>Image uploaded</Typography>
+                      </div>
+                      <div className={classes.loadingStep}>
+                        <div className={classes.loadingStepIcon}>⏳</div>
+                        <Typography className={classes.loadingStepText}>Processing features</Typography>
+                      </div>
+                      <div className={classes.loadingStep}>
+                        <div className={classes.loadingStepIconPending}>•</div>
+                        <Typography className={classes.loadingStepTextPending}>Generating report</Typography>
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>}
                 {data && <CardContent className={classes.detail}>
                   <div className={classes.resultCard}>

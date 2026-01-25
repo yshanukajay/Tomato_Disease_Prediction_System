@@ -110,30 +110,66 @@ export default function App() {
 
             <View style={styles.hero}>
                 <View style={styles.brandRow}>
-                    <Image source={require('./assets/cblogo.png')} style={styles.logo} />
-                    <View>
-                        <Text style={styles.kicker}>Agri Vision</Text>
-                        <Text style={styles.title}>Tomato Disease Detector</Text>
+                    <View style={styles.logoWrapper}>
+                        <Image source={require('./assets/cblogo.png')} style={styles.logo} />
+                    </View>
+                    <View style={styles.brandTextContainer}>
+                        <Text style={styles.kicker}>🌱 TOMO VISION</Text>
+                        <Text style={styles.title}>Tomato Disease{"\n"}Detector</Text>
                     </View>
                 </View>
-                <Text style={styles.subtitle}>Snap or upload a leaf to get instant diagnosis and care tips.</Text>
+                <View style={styles.divider} />
+                <Text style={styles.subtitle}>📸 Snap or upload a tomato leaf to receive instant AI-powered diagnosis and expert care recommendations.</Text>
                 <View style={styles.statusRow}>
                     <View style={[styles.pill, styles.pillSuccess]}>
                         <View style={styles.dot} />
-                        <Text style={styles.pillText}>Model Ready</Text>
+                        <Text style={styles.pillText}>AI Model Active</Text>
                     </View>
-                    <View style={[styles.pill, styles.pillMuted]}>
-                        <Text style={styles.pillTextSmall}>{apiUrl}</Text>
+                    <View style={[styles.pill, styles.pillInfo]}>
+                        <Text style={styles.pillText}>✓ Ready</Text>
+                    </View>
+                </View>
+            </View>
+
+            <View style={styles.diseasesCard}>
+                <Text style={styles.diseasesTitle}>🔬 Detectable Conditions</Text>
+                <Text style={styles.diseasesSubtitle}>Our AI can identify the following:</Text>
+                <View style={styles.diseasesList}>
+                    <View style={styles.diseaseRow}>
+                        <View style={styles.diseaseBullet} />
+                        <Text style={styles.diseaseItem}>Tomato Bacterial Spot</Text>
+                    </View>
+                    <View style={styles.diseaseRow}>
+                        <View style={styles.diseaseBullet} />
+                        <Text style={styles.diseaseItem}>Tomato Early Blight</Text>
+                    </View>
+                    <View style={styles.diseaseRow}>
+                        <View style={styles.diseaseBullet} />
+                        <Text style={styles.diseaseItem}>Tomato Late Blight</Text>
+                    </View>
+                    <View style={styles.diseaseRow}>
+                        <View style={styles.diseaseBullet} />
+                        <Text style={styles.diseaseItem}>Tomato Leaf Mold</Text>
+                    </View>
+                    <View style={styles.diseaseRow}>
+                        <View style={styles.diseaseBullet} />
+                        <Text style={styles.diseaseItem}>Tomato Target Spot</Text>
+                    </View>
+                    <View style={styles.diseaseRow}>
+                        <View style={[styles.diseaseBullet, styles.healthyBullet]} />
+                        <Text style={[styles.diseaseItem, styles.healthyItem]}>Healthy Tomato ✓</Text>
                     </View>
                 </View>
             </View>
 
             <View style={styles.buttonRow}>
-                <TouchableOpacity style={styles.buttonPrimary} onPress={() => pickImage(true)}>
-                    <Text style={styles.buttonText}>Use Camera</Text>
+                <TouchableOpacity style={styles.buttonPrimary} onPress={() => pickImage(true)} activeOpacity={0.8}>
+                    <Text style={styles.buttonIcon}>📷</Text>
+                    <Text style={styles.buttonText}>Camera</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.buttonGhost} onPress={() => pickImage(false)}>
-                    <Text style={styles.buttonText}>Pick from Gallery</Text>
+                <TouchableOpacity style={styles.buttonGhost} onPress={() => pickImage(false)} activeOpacity={0.8}>
+                    <Text style={styles.buttonIcon}>🖼️</Text>
+                    <Text style={styles.buttonText}>Gallery</Text>
                 </TouchableOpacity>
             </View>
 
@@ -145,19 +181,27 @@ export default function App() {
             )}
 
             {uploading && (
-                <View style={styles.card}>
-                    <ActivityIndicator size="large" color="#4caf50" />
-                    <Text style={styles.info}>Analyzing leaf image...</Text>
+                <View style={styles.loadingCard}>
+                    <ActivityIndicator size="large" color="#62c554" />
+                    <Text style={styles.loadingTitle}>Analyzing Leaf...</Text>
+                    <Text style={styles.loadingSubtitle}>AI model processing your image</Text>
                 </View>
             )}
 
             {result && (
                 <View>
-                    <View style={styles.card}>
-                        <Text style={styles.sectionLabel}>Prediction</Text>
+                    <View style={styles.resultCard}>
+                        <View style={styles.resultBadge}>
+                            <Text style={styles.resultBadgeText}>{result.class === "Tomato_healthy" ? "✓" : "⚠"}</Text>
+                        </View>
+                        <Text style={styles.sectionLabel}>DIAGNOSIS</Text>
                         <Text style={styles.value}>{formatLabel(result.class)}</Text>
-                        <Text style={styles.label}>Confidence</Text>
-                        <Text style={styles.value}>{Math.round((result.confidence || 0) * 100)}%</Text>
+                        <View style={styles.confidenceContainer}>
+                            <View style={styles.confidenceBarBg}>
+                                <View style={[styles.confidenceBar, { width: `${Math.round((result.confidence || 0) * 100)}%` }]} />
+                            </View>
+                            <Text style={styles.confidenceText}>{Math.round((result.confidence || 0) * 100)}% Confidence</Text>
+                        </View>
                     </View>
 
                     {info && (
@@ -202,39 +246,61 @@ const styles = StyleSheet.create({
         paddingBottom: 30,
     },
     hero: {
-        backgroundColor: '#132415',
-        borderRadius: 18,
-        padding: 18,
-        borderWidth: 1,
-        borderColor: '#234025',
-        marginBottom: 16,
+        backgroundColor: '#1a2e1c',
+        borderRadius: 20,
+        padding: 24,
+        borderWidth: 2,
+        borderColor: '#2d4a30',
+        marginBottom: 20,
         shadowColor: '#000',
-        shadowOpacity: 0.2,
-        shadowOffset: { width: 0, height: 6 },
-        shadowRadius: 12,
+        shadowOpacity: 0.4,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 16,
+        elevation: 8,
     },
     brandRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 10,
+        marginBottom: 16,
+    },
+    logoWrapper: {
+        width: 68,
+        height: 68,
+        borderRadius: 16,
+        backgroundColor: '#ffffff',
+        padding: 6,
+        shadowColor: '#62c554',
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 12,
+        elevation: 6,
+        marginRight: 14,
     },
     logo: {
-        width: 56,
-        height: 56,
+        width: '100%',
+        height: '100%',
         borderRadius: 12,
-        marginRight: 12,
+    },
+    brandTextContainer: {
+        flex: 1,
     },
     kicker: {
         color: '#8bc34a',
-        fontSize: 12,
-        letterSpacing: 1,
-        textTransform: 'uppercase',
+        fontSize: 11,
+        letterSpacing: 1.5,
+        fontWeight: '700',
+        marginBottom: 4,
     },
     title: {
-        fontSize: 26,
+        fontSize: 22,
         fontWeight: '800',
         color: '#ffffff',
-        marginTop: 2,
+        lineHeight: 26,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#2d4a30',
+        marginVertical: 14,
     },
     subtitle: {
         fontSize: 14,
@@ -256,14 +322,14 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     pillSuccess: {
-        backgroundColor: 'rgba(98, 197, 84, 0.14)',
+        backgroundColor: 'rgba(98, 197, 84, 0.2)',
         borderColor: '#62c554',
-        borderWidth: 1,
+        borderWidth: 1.5,
     },
-    pillMuted: {
-        backgroundColor: '#0f1f10',
-        borderColor: '#234025',
-        borderWidth: 1,
+    pillInfo: {
+        backgroundColor: 'rgba(139, 195, 74, 0.2)',
+        borderColor: '#8bc34a',
+        borderWidth: 1.5,
     },
     dot: {
         width: 8,
@@ -282,43 +348,187 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         fontSize: 11,
     },
+    diseasesCard: {
+        backgroundColor: '#1a2e1c',
+        borderRadius: 18,
+        padding: 20,
+        marginBottom: 18,
+        borderWidth: 2,
+        borderColor: '#2d4a30',
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    diseasesTitle: {
+        color: '#62c554',
+        fontSize: 17,
+        fontWeight: '800',
+        marginBottom: 6,
+    },
+    diseasesSubtitle: {
+        color: '#a3b7a6',
+        fontSize: 13,
+        marginBottom: 14,
+        fontWeight: '500',
+    },
+    diseasesList: {
+        gap: 10,
+    },
+    diseaseRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    diseaseBullet: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: '#62c554',
+        marginRight: 10,
+    },
+    healthyBullet: {
+        backgroundColor: '#8bc34a',
+    },
+    diseaseItem: {
+        color: '#cfd8dc',
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    healthyItem: {
+        color: '#8bc34a',
+        fontWeight: '700',
+    },
     buttonRow: {
         flexDirection: 'row',
-        marginBottom: 14,
+        marginBottom: 16,
+        gap: 12,
     },
     buttonPrimary: {
         flex: 1,
         backgroundColor: '#62c554',
-        paddingVertical: 14,
-        borderRadius: 12,
+        paddingVertical: 16,
+        borderRadius: 14,
         alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
         shadowColor: '#62c554',
-        shadowOpacity: 0.35,
-        shadowOffset: { width: 0, height: 8 },
-        shadowRadius: 18,
-        marginRight: 8,
+        shadowOpacity: 0.5,
+        shadowOffset: { width: 0, height: 6 },
+        shadowRadius: 20,
+        elevation: 8,
     },
     buttonGhost: {
         flex: 1,
         borderColor: '#62c554',
-        borderWidth: 2,
-        paddingVertical: 12,
-        borderRadius: 12,
+        borderWidth: 2.5,
+        paddingVertical: 14,
+        borderRadius: 14,
         alignItems: 'center',
-        backgroundColor: 'rgba(98, 197, 84, 0.08)',
+        justifyContent: 'center',
+        flexDirection: 'row',
+        backgroundColor: 'rgba(98, 197, 84, 0.12)',
+    },
+    buttonIcon: {
+        fontSize: 18,
+        marginRight: 8,
     },
     buttonText: {
         color: '#fff',
-        fontWeight: '700',
+        fontWeight: '800',
         fontSize: 15,
     },
     previewCard: {
-        backgroundColor: '#122816',
-        borderRadius: 16,
-        padding: 14,
-        borderWidth: 1,
-        borderColor: '#234025',
-        marginBottom: 12,
+        backgroundColor: '#1a2e1c',
+        borderRadius: 18,
+        padding: 16,
+        borderWidth: 2,
+        borderColor: '#2d4a30',
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 10,
+        elevation: 6,
+    },
+    loadingCard: {
+        backgroundColor: '#1a2e1c',
+        borderRadius: 18,
+        padding: 28,
+        marginTop: 10,
+        borderWidth: 2,
+        borderColor: '#2d4a30',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 10,
+        elevation: 6,
+    },
+    loadingTitle: {
+        color: '#ffffff',
+        fontSize: 18,
+        fontWeight: '700',
+        marginTop: 16,
+    },
+    loadingSubtitle: {
+        color: '#a3b7a6',
+        fontSize: 13,
+        marginTop: 6,
+    },
+    resultCard: {
+        backgroundColor: '#1a2e1c',
+        borderRadius: 18,
+        padding: 20,
+        marginTop: 10,
+        borderWidth: 2,
+        borderColor: '#2d4a30',
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 0, height: 6 },
+        shadowRadius: 12,
+        elevation: 8,
+        position: 'relative',
+    },
+    resultBadge: {
+        position: 'absolute',
+        top: -12,
+        right: 20,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: '#62c554',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#62c554',
+        shadowOpacity: 0.5,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    resultBadgeText: {
+        fontSize: 20,
+    },
+    confidenceContainer: {
+        marginTop: 16,
+    },
+    confidenceBarBg: {
+        height: 8,
+        backgroundColor: '#0f1f10',
+        borderRadius: 4,
+        overflow: 'hidden',
+        marginBottom: 8,
+    },
+    confidenceBar: {
+        height: '100%',
+        backgroundColor: '#62c554',
+        borderRadius: 4,
+    },
+    confidenceText: {
+        color: '#a3b7a6',
+        fontSize: 13,
+        fontWeight: '700',
+        textAlign: 'center',
     },
     preview: {
         width: '100%',
@@ -327,61 +537,78 @@ const styles = StyleSheet.create({
     },
     sectionLabel: {
         color: '#8bc34a',
-        fontSize: 12,
-        fontWeight: '700',
-        letterSpacing: 0.4,
-        marginBottom: 8,
+        fontSize: 11,
+        fontWeight: '800',
+        letterSpacing: 1.2,
+        marginBottom: 10,
     },
     card: {
         width: '100%',
-        backgroundColor: '#132415',
-        borderRadius: 16,
-        padding: 16,
+        backgroundColor: '#1a2e1c',
+        borderRadius: 18,
+        padding: 20,
         marginTop: 10,
-        borderWidth: 1,
-        borderColor: '#234025',
+        borderWidth: 2,
+        borderColor: '#2d4a30',
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 10,
+        elevation: 6,
     },
     label: {
-        color: '#9e9e9e',
+        color: '#a3b7a6',
         fontSize: 12,
-        marginTop: 10,
+        marginTop: 12,
+        fontWeight: '600',
     },
     value: {
         color: '#ffffff',
-        fontSize: 20,
+        fontSize: 24,
         fontWeight: '800',
         marginTop: 6,
     },
     info: {
         color: '#cfd8dc',
-        marginTop: 8,
+        marginTop: 12,
+        fontSize: 14,
     },
     infoCard: {
-        backgroundColor: '#132415',
-        borderRadius: 16,
-        padding: 20,
+        backgroundColor: '#1a2e1c',
+        borderRadius: 18,
+        padding: 22,
         marginTop: 16,
-        borderWidth: 1,
-        borderColor: '#234025',
+        borderWidth: 2,
+        borderColor: '#2d4a30',
+        shadowColor: '#000',
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 10,
+        elevation: 6,
     },
     infoTitle: {
         color: '#62c554',
         fontSize: 16,
         fontWeight: '800',
-        marginTop: 12,
-        marginBottom: 6,
+        marginTop: 14,
+        marginBottom: 8,
     },
     infoText: {
         color: '#cfd8dc',
         fontSize: 14,
-        lineHeight: 20,
+        lineHeight: 22,
     },
     resetButton: {
         backgroundColor: '#62c554',
-        paddingVertical: 14,
-        borderRadius: 12,
+        paddingVertical: 16,
+        borderRadius: 14,
         alignItems: 'center',
-        marginTop: 16,
+        marginTop: 18,
+        shadowColor: '#62c554',
+        shadowOpacity: 0.4,
+        shadowOffset: { width: 0, height: 6 },
+        shadowRadius: 16,
+        elevation: 8,
     },
     errorCard: {
         borderColor: '#f44336',

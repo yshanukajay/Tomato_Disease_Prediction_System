@@ -1,9 +1,15 @@
 {
     "expo": {
-        "name": "TomatoDiseaseMobile",
-        "slug": "tomato-disease-mobile",
+        "name": "Tomo Vision",
+        "slug": "tomo-vision",
         "version": "1.0.0",
         "orientation": "portrait",
+        "icon": "./assets/cblogo.png",
+        "splash": {
+            "image": "./assets/cblogo.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#0f1f10"
+        },
         "updates": {
             "fallbackToCacheTimeout": 0
         },
@@ -11,11 +17,19 @@
             "**/*"
         ],
         "ios": {
-            "supportsTablet": true
+            "supportsTablet": true,
+            "bundleIdentifier": "com.tomovision.app"
         },
         "android": {
-            "permissions": [],
-            "package": "com.tomato.disease"
+            "permissions": [
+                "CAMERA",
+                "READ_EXTERNAL_STORAGE"
+            ],
+            "package": "com.tomovision.app",
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/cblogo.png",
+                "backgroundColor": "#0f1f10"
+            }
         },
         "web": {},
         "extra": {
