@@ -1,0 +1,25 @@
+{
+    "expo": {
+        "name": "TomatoDiseaseMobile",
+        "slug": "tomato-disease-mobile",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "updates": {
+            "fallbackToCacheTimeout": 0
+        },
+        "assetBundlePatterns": [
+            "**/*"
+        ],
+        "ios": {
+            "supportsTablet": true
+        },
+        "android": {
+            "permissions": [],
+            "package": "com.tomato.disease"
+        },
+        "web": {},
+        "extra": {
+            "apiUrl": "http://10.0.2.2:8000/predict"
+        }
+    }
+}
