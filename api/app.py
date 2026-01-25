@@ -4,8 +4,9 @@ import uvicorn
 import os
 import numpy as np
 from io import BytesIO
-from PIL import Image
+from PIL import Image, ImageOps
 import tensorflow as tf
+from tensorflow.keras.applications.efficientnet import preprocess_input
 
 app = FastAPI()
 
@@ -27,8 +28,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(
     BASE_DIR,
     "..",
-    "saved_models",
-    "1.keras"
+    "models",
+    "best_effnetb0.keras"
 )
 
 print("MODEL PATH:", MODEL_PATH)
@@ -36,6 +37,9 @@ print("EXISTS:", os.path.exists(MODEL_PATH))
 
 
 MODEL = tf.keras.models.load_model(MODEL_PATH)
+
+# EfficientNetB0 expects 224x224 RGB with preprocess_input applied
+IMAGE_SIZE = 224
 
 CLASS_NAMES = [ 'Tomato_Bacterial_spot',
                 'Tomato_Early_blight',
@@ -49,15 +53,20 @@ async def ping():
     return "Hello, World!"
 
 def read_file_as_image(data) -> np.ndarray:
-    image = np.array(Image.open(BytesIO(data)))
-    return image
+    # Load, convert to RGB, center-crop/fit, and resize to model's expected size
+    img = Image.open(BytesIO(data)).convert("RGB")
+    img = ImageOps.fit(img, (IMAGE_SIZE, IMAGE_SIZE), method=Image.LANCZOS)
+    arr = np.asarray(img, dtype=np.float32)
+    # Add batch dimension and apply EfficientNet preprocessing (scales to float range)
+    arr = np.expand_dims(arr, axis=0)
+    arr = preprocess_input(arr)
+    return arr
 
 @app.post("/predict")
 async def predict(
     file: UploadFile = File(...)
 ):
-    image = read_file_as_image(await file.read())  # Read the uploaded file (you can process it as needed)
-    img_batch = np.expand_dims(image, 0)  # Expand dimensions to match model input shape
+    img_batch = read_file_as_image(await file.read())
 
     predictions = MODEL.predict(img_batch)
 
