@@ -238,7 +238,7 @@ export default function App() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0f1f10',
+        backgroundColor: '#1a1a2e',
     },
     contentContainer: {
         paddingTop: Platform.select({ ios: 60, android: 40, default: 32 }),
@@ -246,11 +246,11 @@ const styles = StyleSheet.create({
         paddingBottom: 30,
     },
     hero: {
-        backgroundColor: '#1a2e1c',
+        backgroundColor: '#16213e',
         borderRadius: 20,
         padding: 24,
         borderWidth: 2,
-        borderColor: '#2d4a30',
+        borderColor: '#0f3460',
         marginBottom: 20,
         shadowColor: '#000',
         shadowOpacity: 0.4,
