@@ -1,0 +1,9 @@
+fastapi==0.95.2
+uvicorn==0.22.0
+python-multipart==0.0.6
+tensorflow==2.11.0
+pillow==10.1.0
+numpy==1.23.5
+typing-extensions==4.5.0
+pydantic==1.10.13
+h5py==3.8.0

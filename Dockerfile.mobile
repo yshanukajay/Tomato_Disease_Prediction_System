@@ -1,0 +1,19 @@
+# Build stage
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy mobile package files
+COPY mobile/package.json mobile/package-lock.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy mobile app source
+COPY mobile/ .
+
+# Expose Expo port and tunnel port
+EXPOSE 8081 19000 19001
+
+# Start Expo development server
+CMD ["npm", "start", "--", "--localhost"]
