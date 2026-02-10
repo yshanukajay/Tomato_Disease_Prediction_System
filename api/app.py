@@ -7,6 +7,7 @@ from io import BytesIO
 from PIL import Image, ImageOps
 import tensorflow as tf
 from tensorflow.keras.applications.efficientnet import preprocess_input
+import json
 
 app = FastAPI()
 
@@ -30,12 +31,22 @@ MODEL_PATH = os.path.join(
     BASE_DIR,
     "..",
     "models",
-    "best_effnetb0.keras"
+    "1.keras"
 )
 
 print("MODEL PATH:", MODEL_PATH)
 print("EXISTS:", os.path.exists(MODEL_PATH))
 
+# Monkey-patch the InputLayer's from_config to handle legacy batch_shape
+original_from_config = tf.keras.layers.InputLayer.from_config
+
+@classmethod
+def patched_from_config(cls, config):
+    if "batch_shape" in config and "batch_input_shape" not in config:
+        config["batch_input_shape"] = config.pop("batch_shape")
+    return original_from_config(config)
+
+tf.keras.layers.InputLayer.from_config = patched_from_config
 
 MODEL = tf.keras.models.load_model(MODEL_PATH)
 
