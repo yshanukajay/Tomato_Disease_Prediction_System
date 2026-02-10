@@ -36,14 +36,11 @@ MODEL_PATH = os.path.join(
     BASE_DIR,
     "..",
     "models",
-    "best_effnetb0.keras"
+    "tomato_effnetb0.keras"
 )
 
 print("MODEL PATH:", MODEL_PATH)
 print("EXISTS:", os.path.exists(MODEL_PATH))
-
-
-MODEL = tf.keras.models.load_model(MODEL_PATH)
 
 # EfficientNetB0 expects 224x224 RGB with preprocess_input applied
 IMAGE_SIZE = 224
@@ -58,21 +55,13 @@ CLASS_NAMES = [
     'Tomato_healthy' 
 ]
 
-# Using the filename seen in your successful load logs
-MODEL_PATH = os.path.join(BASE_DIR, "..", "models", "tomato_effnetb0.keras")
-
 print(f"Loading model from: {MODEL_PATH}")
 try:
-    # We use safe_mode=False if you have custom layers/Lambda layers
     MODEL = keras.models.load_model(MODEL_PATH)
-    print("--- Model Summary ---")
-    MODEL.summary() 
     print(f"Successfully loaded model from: {MODEL_PATH}")
 except Exception as e:
     print(f"Error loading model: {e}")
-    # Fallback to 1.keras if the first one fails
-    MODEL_PATH = os.path.join(BASE_DIR, "..", "models", "1.keras")
-    MODEL = keras.models.load_model(MODEL_PATH)
+    raise
 
 @app.get("/ping")
 async def ping():
@@ -98,14 +87,24 @@ async def predict(file: UploadFile = File(...)):
         
         # Get index of highest confidence
         predicted_index = np.argmax(predictions[0])
+        confidence = np.max(predictions[0])
+        
+        # Confidence threshold to detect non-tomato images
+        # If confidence is too low, it's likely not a tomato
+        CONFIDENCE_THRESHOLD = 0.5
+        
+        if confidence < CONFIDENCE_THRESHOLD:
+            return {
+                'class': 'Not a Tomato Leaf',
+                'confidence': float(confidence),
+                'message': 'The uploaded image does not appear to be a tomato leaf. Please upload a clear image of a tomato plant leaf.'
+            }
         
         # Safety check for class name index
         if predicted_index >= len(CLASS_NAMES):
             predicted_class = f"Unknown Disease (Index {predicted_index})"
         else:
             predicted_class = CLASS_NAMES[predicted_index]
-            
-        confidence = np.max(predictions[0])
 
         return {
             'class': predicted_class,
