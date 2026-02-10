@@ -33,7 +33,7 @@
     },
     "web": {},
     "extra": {
-      "apiUrl": "http://172.16.193.34:8000/predict",
+      "apiUrl": "http://10.0.2.2:8000/predict",
       "eas": {
         "projectId": "2a4a6949-8d5f-431f-8c66-ae0d9084eb47"
       }

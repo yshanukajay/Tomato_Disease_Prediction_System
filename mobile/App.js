@@ -43,7 +43,14 @@ export default function App() {
     const [uploading, setUploading] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
-    const apiUrl = useMemo(() => Constants.expoConfig?.extra?.apiUrl || 'http://localhost:8000/predict', []);
+
+    // Use 10.0.2.2 for Android emulator, otherwise use config URL
+    const apiUrl = useMemo(() => {
+        if (Platform.OS === 'android') {
+            return 'http://10.0.2.2:8000/predict';
+        }
+        return Constants.expoConfig?.extra?.apiUrl || 'http://localhost:8000/predict';
+    }, []);
 
     const pickImage = async (fromCamera) => {
         setError(null);
