@@ -36,7 +36,7 @@ MODEL_PATH = os.path.join(
     BASE_DIR,
     "..",
     "models",
-    "tomato_effnetb0.keras"
+    "latest_best_effnetb0.keras"
 )
 
 print("MODEL PATH:", MODEL_PATH)
