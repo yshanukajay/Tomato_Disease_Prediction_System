@@ -1,0 +1,87 @@
+# =============================================================================
+#  CI ? Docker
+#  Validates that all three Dockerfiles build without errors.
+#  Does NOT push any images to a registry.
+# =============================================================================
+name: CI - Docker
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - "Dockerfile.*"
+      - "docker-compose.yml"
+      - "api/**"
+      - "frontend/**"
+      - "mobile/**"
+      - ".github/workflows/ci-docker.yml"
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - "Dockerfile.*"
+      - "docker-compose.yml"
+      - "api/**"
+      - "frontend/**"
+      - "mobile/**"
+      - ".github/workflows/ci-docker.yml"
+
+jobs:
+  build-api:
+    name: Build API image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build API Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.api
+          push: false        # build only ? no push
+          tags: tomato-disease-api:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-frontend:
+    name: Build Frontend image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Frontend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.frontend
+          push: false
+          tags: tomato-disease-frontend:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-mobile:
+    name: Build Mobile image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Mobile Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.mobile
+          push: false
+          tags: tomato-disease-mobile:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

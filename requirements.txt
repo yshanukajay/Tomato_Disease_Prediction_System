@@ -1,0 +1,30 @@
+# Core ML/DL Dependencies
+tensorflow==2.11.0
+# keras is bundled with tensorflow==2.11.0 (Keras 2.x); do NOT install standalone keras>=3.0.0
+numpy<2.0.0
+
+# API Dependencies
+fastapi==0.95.2
+uvicorn==0.22.0
+python-multipart==0.0.6
+pydantic==1.10.13
+
+# Image Processing
+pillow==10.1.0
+
+# Data Science & Visualization
+matplotlib>=3.5.0
+
+# File Handling
+h5py==3.8.0
+
+# Utilities
+typing-extensions>=4.5.0
+requests>=2.28.0
+
+# Jupyter Notebook Support (for notebooks/)
+jupyter>=1.0.0
+ipython>=8.0.0
+
+# Optional: For TensorFlow Serving
+# tensorflow-serving-api
