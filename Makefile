@@ -240,9 +240,9 @@ docker-hub-down:
 ## Tag and push all images to Docker Hub
 docker-push: docker-build
 	@echo "[docker-hub] Pushing images as '$(DOCKERHUB_USERNAME)' (tag: $(IMAGE_TAG)) ..."
-	docker tag tomato-disease-api:latest      $(DOCKERHUB_USERNAME)/tomato-disease-api:$(IMAGE_TAG)
-	docker tag tomato-disease-frontend:latest $(DOCKERHUB_USERNAME)/tomato-disease-frontend:$(IMAGE_TAG)
-	docker tag tomato-disease-mobile:latest   $(DOCKERHUB_USERNAME)/tomato-disease-mobile:$(IMAGE_TAG)
+	docker tag tomato_disease_prediction_system-api:latest      $(DOCKERHUB_USERNAME)/tomato-disease-api:$(IMAGE_TAG)
+	docker tag tomato_disease_prediction_system-frontend:latest $(DOCKERHUB_USERNAME)/tomato-disease-frontend:$(IMAGE_TAG)
+	docker tag tomato_disease_prediction_system-mobile:latest   $(DOCKERHUB_USERNAME)/tomato-disease-mobile:$(IMAGE_TAG)
 	docker push $(DOCKERHUB_USERNAME)/tomato-disease-api:$(IMAGE_TAG)
 	docker push $(DOCKERHUB_USERNAME)/tomato-disease-frontend:$(IMAGE_TAG)
 	docker push $(DOCKERHUB_USERNAME)/tomato-disease-mobile:$(IMAGE_TAG)
