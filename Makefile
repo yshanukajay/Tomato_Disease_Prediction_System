@@ -79,7 +79,7 @@ help:
 	@echo "   make docker-push       Tag & push images to Docker Hub"
 	@echo "                          (set DOCKERHUB_USERNAME=<u> IMAGE_TAG=<t>)"
 	@echo ""
-	@echo " -- Testing ---------------------------------------------------------"
+	@echo " -- Testing ----------------------------------------------------------"
 	@echo "   make test              Run all tests"
 	@echo "   make test-api          API smoke test  (API must be running)"
 	@echo "   make check-deps        Check Python dependency compatibility"
