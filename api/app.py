@@ -3,15 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import os
 
-# Set backend before importing keras
-os.environ["KERAS_BACKEND"] = "tensorflow"
-
-import keras
 import numpy as np
 from io import BytesIO
 from PIL import Image, ImageOps
 import tensorflow as tf
-from tensorflow.keras.applications.efficientnet import preprocess_input
+from tensorflow import keras
+from keras.applications.efficientnet import preprocess_input
 
 app = FastAPI()
 

@@ -1,6 +1,6 @@
 # Core ML/DL Dependencies
-tensorflow==2.11.0
-# keras is bundled with tensorflow==2.11.0 (Keras 2.x); do NOT install standalone keras>=3.0.0
+tensorflow==2.18.0
+keras==3.13.2
 numpy<2.0.0
 
 # API Dependencies
@@ -16,7 +16,7 @@ pillow==10.1.0
 matplotlib>=3.5.0
 
 # File Handling
-h5py==3.8.0
+# h5py is resolved automatically by tensorflow==2.18.0 (requires >=3.11.0)
 
 # Utilities
 typing-extensions>=4.5.0
