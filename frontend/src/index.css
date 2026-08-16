@@ -1,336 +1,53 @@
-body {
-	margin: 0;
-	font-family: 'Inter', 'Poppins', 'Roboto', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	overflow-x: hidden;
-	letter-spacing: 0.3px;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased selection:bg-brand-500 selection:text-white;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
 }
 
-code {
-	font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+/* Custom premium styles */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-/* Professional Dropzone Styling with Glass Morphism */
-.MuiDropzoneArea-root {
-	background: rgba(255, 255, 255, 0.1) !important;
-	backdrop-filter: blur(10px) !important;
-	border: 2px dashed rgba(255, 255, 255, 0.3) !important;
-	border-radius: 16px !important;
-	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-	min-height: 220px !important;
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+.glass-panel-dark {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.MuiDropzoneArea-root:hover {
-	border-color: rgba(76, 175, 80, 0.8) !important;
-	background: rgba(255, 255, 255, 0.25) !important;
-	transform: translateY(-4px) scale(1.02) !important;
-	box-shadow: 0 16px 48px rgba(76, 175, 80, 0.25) !important;
-}
-
-.MuiDropzoneArea-text {
-	color: #37474f !important;
-	font-weight: 700 !important;
-	font-size: 20px !important;
-	text-align: center !important;
-	margin: 20px 0 !important;
-	text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
-	background: rgba(255, 255, 255, 0.7) !important;
-	padding: 16px 24px !important;
-	border-radius: 12px !important;
-	backdrop-filter: blur(10px) !important;
-}
-
-.MuiDropzoneArea-icon {
-	color: #4caf50 !important;
-	font-size: 72px !important;
-	margin-bottom: 20px !important;
-	filter: drop-shadow(0 4px 12px rgba(76, 175, 80, 0.4)) !important;
-}
-
-/* Enhanced Loading Animation */
-@keyframes modernPulse {
-	0% {
-		transform: scale(1) rotate(0deg);
-		box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
-	}
-
-	50% {
-		transform: scale(1.05) rotate(180deg);
-		box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
-	}
-
-	100% {
-		transform: scale(1) rotate(360deg);
-		box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
-	}
-}
-
-.MuiCircularProgress-root {
-	animation: modernPulse 3s infinite !important;
-}
-
-/* Spin Animation for AI Chip Icon */
-@keyframes spin {
-	0% {
-		transform: rotate(0deg);
-	}
-
-	100% {
-		transform: rotate(360deg);
-	}
-}
-
-/* Glass Morphism Effects */
-.MuiCard-root {
-	backdrop-filter: blur(20px) !important;
-	background: rgba(255, 255, 255, 0.95) !important;
-	border: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-/* Professional Smooth Transitions */
-* {
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-/* Custom Professional Scrollbars */
-::-webkit-scrollbar {
-	width: 8px;
-}
-
-::-webkit-scrollbar-track {
-	background: rgba(255, 255, 255, 0.1);
-	border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-	background: rgba(255, 255, 255, 0.3);
-	border-radius: 10px;
-	backdrop-filter: blur(10px);
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background: rgba(255, 255, 255, 0.5);
-}
-
-/* Professional Focus States */
-.MuiButton-root:focus {
-	outline: 2px solid rgba(76, 175, 80, 0.5) !important;
-	outline-offset: 2px !important;
-}
-
-/* Enhanced Table Styling */
-.MuiTableContainer-root {
-	backdrop-filter: blur(10px) !important;
-	background: rgba(255, 255, 255, 0.05) !important;
-	border-radius: 12px !important;
-}
-
-/* Mobile Responsive Enhancements */
-@media (max-width: 768px) {
-	.MuiDropzoneArea-text {
-		font-size: 16px !important;
-	}
-
-	.MuiDropzoneArea-icon {
-		font-size: 48px !important;
-	}
-}
-
-/* Smooth Slide In Animation */
-@keyframes slideInUp {
-	0% {
-		opacity: 0;
-		transform: translateY(30px);
-	}
-
-	100% {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-/* Fade In Animation */
-@keyframes fadeIn {
-	0% {
-		opacity: 0;
-	}
-
-	100% {
-		opacity: 1;
-	}
-}
-
-/* Bounce In Animation */
-@keyframes bounceIn {
-	0% {
-		opacity: 0;
-		transform: scale(0.3);
-	}
-
-	50% {
-		opacity: 1;
-		transform: scale(1.05);
-	}
-
-	70% {
-		transform: scale(0.9);
-	}
-
-	100% {
-		transform: scale(1);
-	}
-}
-
-/* Shimmer Effect for Loading */
+/* Custom Shimmer Effect */
 @keyframes shimmer {
-	0% {
-		background-position: -1000px 0;
-	}
-
-	100% {
-		background-position: 1000px 0;
-	}
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
-/* Enhanced Card Hover Effects */
-.MuiCard-root:hover {
-	animation: none !important;
+.shimmer {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
 }
 
-/* Progress Bar Animation */
-@keyframes progressGrow {
-	0% {
-		width: 0;
-	}
+/* Custom Scan Animation */
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(300%);
+  }
 }
 
-/* Improved Focus Indicators for Accessibility */
-*:focus-visible {
-	outline: 3px solid rgba(76, 175, 80, 0.6) !important;
-	outline-offset: 3px !important;
-	border-radius: 4px !important;
-}
-
-/* Badge Pulse Animation */
-@keyframes badgePulse {
-
-	0%,
-	100% {
-		transform: scale(1);
-		box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-	}
-
-	50% {
-		transform: scale(1.05);
-		box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
-	}
-}
-
-/* Smooth Entrance for Results */
-.MuiCardContent-root {
-	animation: fadeIn 0.5s ease-out !important;
-}
-
-/* Improved Typography */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-	text-rendering: optimizeLegibility;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-/* Loading Skeleton Shimmer */
-.loading-skeleton {
-	background: linear-gradient(90deg,
-			rgba(255, 255, 255, 0.1) 0%,
-			rgba(255, 255, 255, 0.3) 50%,
-			rgba(255, 255, 255, 0.1) 100%);
-	background-size: 1000px 100%;
-	animation: shimmer 2s infinite;
-}
-
-/* Animated Border Rotation */
-@keyframes borderRotate {
-	0% {
-		background-position: 0% 50%;
-	}
-
-	50% {
-		background-position: 100% 50%;
-	}
-
-	100% {
-		background-position: 0% 50%;
-	}
-}
-
-/* Result Card Glow Effect */
-@keyframes resultGlow {
-	0% {
-		box-shadow: 0 12px 40px rgba(76, 175, 80, 0.25), 0 0 20px rgba(139, 195, 74, 0.15);
-	}
-
-	100% {
-		box-shadow: 0 16px 50px rgba(76, 175, 80, 0.35), 0 0 30px rgba(139, 195, 74, 0.25);
-	}
-}
-
-/* Floating Animation for Cards */
-@keyframes float {
-
-	0%,
-	100% {
-		transform: translateY(0px);
-	}
-
-	50% {
-		transform: translateY(-10px);
-	}
-}
-
-/* Gradient Animation */
-@keyframes gradientShift {
-	0% {
-		background-position: 0% 50%;
-	}
-
-	50% {
-		background-position: 100% 50%;
-	}
-
-	100% {
-		background-position: 0% 50%;
-	}
-}
-
-/* Enhanced Card Shadow Pulse */
-@keyframes shadowPulse {
-
-	0%,
-	100% {
-		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(102, 126, 234, 0.1);
-	}
-
-	50% {
-		box-shadow: 0 25px 70px rgba(102, 126, 234, 0.4), 0 0 0 3px rgba(102, 126, 234, 0.2);
-	}
-}
-
-/* Glow Border Effect */
-.MuiCard-root {
-	position: relative;
-}
-
-/* Enhanced Dropzone Glow */
-.MuiDropzoneArea-root:hover {
-	border-color: rgba(76, 175, 80, 0.8) !important;
-	background: rgba(255, 255, 255, 0.25) !important;
-	transform: translateY(-4px) scale(1.02) !important;
-	box-shadow: 0 16px 48px rgba(76, 175, 80, 0.25), 0 0 30px rgba(102, 187, 106, 0.2) !important;
+.scan-line {
+  animation: scan 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }

@@ -1,4 +1,5 @@
-import { ImageUpload } from "./home";
+import ImageUpload from "./home";
+import "./index.css";
 
 function App() {
   return <ImageUpload />;

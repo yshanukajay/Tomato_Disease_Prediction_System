@@ -1,1134 +1,682 @@
-import { useState, useEffect } from "react";
-import { makeStyles, withStyles } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import Avatar from "@material-ui/core/Avatar";
-import Container from "@material-ui/core/Container";
-import React from "react";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import { Paper, CardActionArea, CardMedia, Grid, TableContainer, Table, TableBody, TableHead, TableRow, TableCell, Button, CircularProgress, Chip, Fade, Zoom } from "@material-ui/core";
-import image from "./bg.png";
-import { DropzoneArea } from 'material-ui-dropzone';
-import Clear from '@material-ui/icons/Clear';
-import InfoIcon from '@material-ui/icons/Info';
-import AutorenewIcon from '@material-ui/icons/Autorenew';
-import RefreshIcon from '@material-ui/icons/Refresh';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  UploadCloud,
+  FileImage,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle,
+  Shield,
+  Zap,
+  Layers,
+  Heart,
+  HelpCircle,
+  ChevronRight,
+  BookOpen,
+  Info,
+  Download,
+  Flame,
+  MousePointer,
+  Sparkles
+} from 'lucide-react';
 import { InfoGuide } from './InfoGuide';
 import { Footer } from './Footer';
 
-// Disease information database
-const diseaseInfo = {
-  "Tomato_Bacterial_spot": {
-    description: "Bacterial leaf spot causes dark spots with yellow halos on leaves and fruit.",
-    symptoms: "Small brown spots with yellow halos, defoliation",
-    treatment: "Use copper-based bactericides, remove infected plants, practice crop rotation"
+// Disease details mapped with SaaS style descriptions
+const DISEASE_DETAILS = {
+  Tomato_Bacterial_spot: {
+    name: 'Bacterial Spot',
+    severity: 'critical',
+    severityText: 'Action Required',
+    icon: '🦠',
+    description: 'Caused by Xanthomonas bacteria. Causes lesions on foliage and blemishes on fruit, greatly reducing yield.',
+    symptoms: 'Small, dark green, greasy spots on leaf margins. Spots turn blackish-brown and develop a distinct yellow halo.',
+    treatment: 'Apply copper-based bactericides immediately. Prune and destroy lower diseased branches to reduce soil-splash spread.',
+    prevention: 'Avoid overhead watering. Maintain excellent ventilation. Rotate crops with non-solanaceous plants annually.',
+    comparison: 'Bacterial spot lesions are smaller and more greasy-looking compared to the concentric target-like rings of Early Blight.',
   },
-  "Tomato_Early_blight": {
-    description: "Fungal disease causing brown spots with concentric rings (target-like pattern).",
-    symptoms: "Brown circular spots with concentric rings, yellowing leaves",
-    treatment: "Apply fungicides, remove infected leaves, improve air circulation"
+  Tomato_Early_blight: {
+    name: 'Early Blight',
+    severity: 'high',
+    severityText: 'High Severity',
+    icon: '🍂',
+    description: 'A common fungal infection caused by Alternaria solani. Flourishes in warm, damp weather conditions.',
+    symptoms: 'Concentric target-like rings on older leaves. Leaves yellow and eventually die from the bottom of the plant upwards.',
+    treatment: 'Apply fungicides containing chlorothalonil, copper, or mancozeb. Strip lower infected leaves early.',
+    prevention: 'Apply thick organic mulch to limit spore splash-back. Water plants at the base. Space plants sufficiently.',
+    comparison: 'Unlike Late Blight which causes greasy dark water-soaked spots, Early Blight is defined by dark, dry concentric rings.',
   },
-  "Tomato_Late_blight": {
-    description: "Destructive fungal disease that can rapidly destroy entire plants.",
-    symptoms: "Water-soaked lesions, white fungal growth, rapid plant death",
-    treatment: "Apply fungicides preventatively, destroy infected plants immediately"
+  Tomato_Late_blight: {
+    name: 'Late Blight',
+    severity: 'critical',
+    severityText: 'Critical Threat',
+    icon: '⚠️',
+    description: 'Caused by Phytophthora infestans. An extremely aggressive pathogen capable of destroying whole fields within days.',
+    symptoms: 'Dark brown, water-soaked oily spots on leaves. Fine white fungal fuzz appears on the lower leaf surface in humid air.',
+    treatment: 'Fungicides are only effective as a preventive measure. Once established, immediately bag and destroy infected plants.',
+    prevention: 'Use certified disease-free seeds. Choose blight-resistant cultivars. Avoid wet leaves overnight.',
+    comparison: 'Late Blight is much faster-killing than Early Blight and causes large, dark greasy lesions rather than concentric rings.',
   },
-  "Tomato_Leaf_Mold": {
-    description: "Fungal disease that thrives in humid conditions with poor air flow.",
-    symptoms: "Yellow spots on upper leaf surface, olive-green mold underneath",
-    treatment: "Reduce humidity, improve ventilation, apply fungicides if needed"
+  Tomato_Leaf_Mold: {
+    name: 'Leaf Mold',
+    severity: 'medium',
+    severityText: 'Moderate Risk',
+    icon: '🌫️',
+    description: 'Fungal infection caused by Passalora fulva. Typically impacts indoor, greenhouse, or high-tunnel crops.',
+    symptoms: 'Pale green or yellowish spots on leaf tops; olive-green, velvety mold growth on the corresponding undersides.',
+    treatment: 'Spray copper-based fungicides if humidity cannot be managed. Strip lower leaves to encourage dry air flow.',
+    prevention: 'Keep greenhouse relative humidity below 85%. Ensure adequate horizontal ventilation using fans.',
+    comparison: 'Leaf mold produces yellow spots on top with a velvet-colored growth underneath, distinguishing it from general blights.',
   },
-  "Tomato_Septoria_leaf_spot": {
-    description: "Common fungal disease causing numerous small spots on leaves.",
-    symptoms: "Small circular spots with dark borders and gray centers",
-    treatment: "Remove infected leaves, apply fungicides, use mulch to prevent splash"
+  Tomato__Target_Spot: {
+    name: 'Target Spot',
+    severity: 'high',
+    severityText: 'High Severity',
+    icon: '🎯',
+    description: 'Fungal disease caused by Corynespora cassiicola. Thrives in warm, highly humid agricultural conditions.',
+    symptoms: 'Zonate circular lesions resembling a target. Spots occur on leaves, stems, and eventually raw or ripe fruit.',
+    treatment: 'Apply preventive or curative fungicides like azoxystrobin. Prune lower foliage to reduce relative humidity.',
+    prevention: 'Remove crop debris post-harvest. Maximize sunshine penetration by pruning weeds and suckers.',
+    comparison: 'Target spot lesions look similar to Early Blight but typically do not cause the quick, generalized yellowing of leaves.',
   },
-  "Tomato_Spider_mites": {
-    description: "Tiny pests that suck plant juices, causing stippling and webbing.",
-    symptoms: "Yellow stippling on leaves, fine webbing, bronze appearance",
-    treatment: "Use miticides, spray with water, introduce predatory mites"
+  Tomato_healthy: {
+    name: 'Healthy Tomato Leaf',
+    severity: 'healthy',
+    severityText: 'Optimum Health',
+    icon: '✅',
+    description: 'No pathogen detected. The leaf exhibits optimal photosynthesis capabilities and uniform structure.',
+    symptoms: 'Clean green color, crisp structure, no lesions, fungal dust, or pest stippling.',
+    treatment: 'No treatment required. Maintain standard watering and trace mineral fertilization schedules.',
+    prevention: 'Continue daily visual scouting. Spray organic neem oil preventatively if surrounding foliage is infected.',
+    comparison: 'Exhibits complete absence of necrotic margins, yellow halo borders, or dusty surface spores.',
   },
-  "Tomato_Target_Spot": {
-    description: "Fungal disease causing concentric ring patterns on leaves and fruit.",
-    symptoms: "Brown spots with concentric rings, defoliation",
-    treatment: "Apply fungicides, remove infected debris, practice crop rotation"
-  },
-  "Tomato_Yellow_Leaf_Curl_Virus": {
-    description: "Viral disease transmitted by whiteflies, causing severe stunting.",
-    symptoms: "Leaf yellowing, curling, stunted growth, reduced fruit production",
-    treatment: "Control whiteflies, remove infected plants, use resistant varieties"
-  },
-  "Tomato_mosaic_virus": {
-    description: "Viral disease causing mottled, distorted leaves and reduced yields.",
-    symptoms: "Mottled light and dark green patterns, leaf distortion",
-    treatment: "Remove infected plants, disinfect tools, use virus-free seeds"
-  },
-  "Tomato_healthy": {
-    description: "Your tomato plant appears healthy with no signs of disease!",
-    symptoms: "Green, vigorous foliage with no discoloration or damage",
-    treatment: "Continue regular care: water consistently, fertilize, monitor for pests"
-  }
 };
 
-const ColorButton = withStyles((theme) => ({
-  root: {
-    color: "#ffffff",
-    background: "linear-gradient(45deg, #4caf50 30%, #66bb6a 90%)",
-    borderRadius: "8px",
-    textTransform: "none",
-    fontWeight: 600,
-    padding: "12px 32px",
-    boxShadow: "0 3px 5px 2px rgba(76, 175, 80, .3)",
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-    '&:hover': {
-      background: "linear-gradient(45deg, #388e3c 30%, #4caf50 90%)",
-      boxShadow: "0 6px 10px 2px rgba(76, 175, 80, .4)",
-      transform: "translateY(-2px)",
-    },
-    '&:active': {
-      transform: "translateY(0px)",
-    },
-  },
-}))(Button);
+const SEVERITY_STYLES = {
+  critical: { text: 'text-rose-600 bg-rose-50 border-rose-200', bar: 'bg-rose-500' },
+  high:     { text: 'text-orange-600 bg-orange-50 border-orange-200', bar: 'bg-orange-500' },
+  medium:   { text: 'text-yellow-600 bg-yellow-50 border-yellow-200', bar: 'bg-yellow-500' },
+  healthy:  { text: 'text-emerald-600 bg-emerald-50 border-emerald-200', bar: 'bg-emerald-500' },
+};
 
-const useStyles = makeStyles((theme) => ({
-  heroBanner: {
-    textAlign: 'center',
-    padding: '60px 24px 40px',
-    background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(76, 175, 80, 0.03) 100%)',
-    animation: 'fadeIn 1s ease-out',
-  },
-  heroTitle: {
-    fontWeight: 800,
-    color: '#ffffff',
-    marginBottom: '16px',
-    textShadow: '0 4px 20px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2)',
-    letterSpacing: '-0.5px',
-  },
-  heroSubtitle: {
-    color: 'rgba(255,255,255,0.95)',
-    fontWeight: 500,
-    textShadow: '0 2px 12px rgba(0,0,0,0.3)',
-  },
-  featureCard: {
-    background: 'linear-gradient(145deg, rgba(255,255,255,0.95), rgba(248,251,248,0.95))',
-    backdropFilter: 'blur(20px)',
-    borderRadius: '20px',
-    padding: '28px 20px',
-    textAlign: 'center',
-    border: '2px solid rgba(76, 175, 80, 0.2)',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-    '&:hover': {
-      transform: 'translateY(-8px)',
-      boxShadow: '0 16px 48px rgba(76, 175, 80, 0.25)',
-      borderColor: 'rgba(76, 175, 80, 0.4)',
-    },
-  },
-  featureIcon: {
-    fontSize: '42px',
-    marginBottom: '12px',
-  },
-  featureTitle: {
-    fontSize: '16px',
-    fontWeight: 700,
-    color: '#1b5e20',
-    marginBottom: '6px',
-  },
-  featureText: {
-    fontSize: '13px',
-    color: '#546e7a',
-    fontWeight: 500,
-  },
-  customDropzone: {
-    minHeight: '180px !important',
-    border: '3px dashed rgba(76, 175, 80, 0.3) !important',
-    borderRadius: '16px !important',
-    background: 'linear-gradient(135deg, rgba(248,251,248,0.5), rgba(240,248,245,0.5)) !important',
-    transition: 'all 0.3s ease !important',
-    '&:hover': {
-      borderColor: 'rgba(76, 175, 80, 0.6) !important',
-      background: 'linear-gradient(135deg, rgba(248,251,248,0.8), rgba(240,248,245,0.8)) !important',
-    },
-  },
-  loadingContainer: {
-    textAlign: 'center',
-    padding: '48px 32px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '20px',
-  },
-  loadingTitle: {
-    fontSize: '24px',
-    fontWeight: 700,
-    color: '#1b5e20',
-    marginTop: '20px',
-  },
-  loadingSubtitle: {
-    fontSize: '15px',
-    color: '#546e7a',
-    fontWeight: 500,
-  },
-  loadingSteps: {
-    marginTop: '32px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '16px',
-    alignItems: 'flex-start',
-    width: '100%',
-    maxWidth: '320px',
-  },
-  loadingStep: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-  },
-  loadingStepIcon: {
-    width: '28px',
-    height: '28px',
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #4caf50, #66bb6a)',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '14px',
-    fontWeight: 700,
-    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-  },
-  loadingStepIconPending: {
-    width: '28px',
-    height: '28px',
-    borderRadius: '50%',
-    background: '#e0e0e0',
-    color: '#9e9e9e',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '20px',
-  },
-  loadingStepText: {
-    fontSize: '15px',
-    color: '#1b5e20',
-    fontWeight: 600,
-  },
-  loadingStepTextPending: {
-    fontSize: '15px',
-    color: '#9e9e9e',
-    fontWeight: 500,
-  },
-  grow: {
-    flexGrow: 1,
-  },
-  clearButton: {
-    width: "100%",
-    borderRadius: "8px",
-    padding: "12px 24px",
-    color: "#ffffff",
-    fontSize: "16px",
-    fontWeight: 600,
-    textTransform: "none",
-    background: "linear-gradient(45deg, #4caf50 30%, #66bb6a 90%)",
-    boxShadow: "0 3px 5px 2px rgba(76, 175, 80, .3)",
-    transition: "all 0.3s ease",
-    '&:hover': {
-      background: "linear-gradient(45deg, #388e3c 30%, #4caf50 90%)",
-      boxShadow: "0 4px 8px 2px rgba(76, 175, 80, .4)",
-      transform: "translateY(-1px)",
-    },
-  },
-  root: {
-    maxWidth: 500,
-    flexGrow: 1,
-  },
-  media: {
-    height: 420,
-    borderRadius: "30px 30px 0 0",
-    position: 'relative',
-    boxShadow: '0 6px 24px rgba(0,0,0,0.15)',
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.04) 100%)',
-      pointerEvents: 'none',
-    },
-  },
-  paper: {
-    padding: theme.spacing(3),
-    margin: 'auto',
-    maxWidth: 600,
-    borderRadius: "16px",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-  },
-  gridContainer: {
-    justifyContent: "center",
-    padding: "3em 1.5em",
-    minHeight: "calc(100vh - 90px)",
-    display: "flex",
-    alignItems: "center",
-  },
-  mainContainer: {
-    backgroundImage: `url(${image})`,
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'center',
-    backgroundSize: 'cover',
-    backgroundAttachment: 'fixed',
-    minHeight: "100vh",
-    paddingTop: "0px",
-    position: 'relative',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.4)',
-      zIndex: 0,
-    },
-    '& > *': {
-      position: 'relative',
-      zIndex: 1,
-    },
-  },
-  diseasesCard: {
-    margin: "auto",
-    maxWidth: 520,
-    marginBottom: 28,
-    padding: theme.spacing(4),
-    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 251, 248, 0.98) 100%)',
-    backdropFilter: 'blur(25px)',
-    boxShadow: '0 12px 48px rgba(76, 175, 80, 0.2), 0 2px 8px rgba(0,0,0,0.08)',
-    borderRadius: '28px',
-    border: '3px solid rgba(76, 175, 80, 0.25)',
-    position: 'relative',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: '4px',
-      background: 'linear-gradient(90deg, #2e7d32 0%, #4caf50 50%, #66bb6a 100%)',
-      borderRadius: '28px 28px 0 0',
-    },
-  },
-  diseasesTitle: {
-    color: '#1b5e20',
-    fontWeight: 800,
-    marginBottom: theme.spacing(2.5),
-    fontSize: '1.35rem',
-    letterSpacing: '0.5px',
-  },
-  diseaseItem: {
-    color: '#37474f',
-    fontSize: '1rem',
-    lineHeight: 2.2,
-    fontWeight: 600,
-    display: 'flex',
-    alignItems: 'center',
-    '&::before': {
-      content: '""',
-      display: 'inline-block',
-      width: '6px',
-      height: '6px',
-      borderRadius: '50%',
-      background: '#4caf50',
-      marginRight: '12px',
-      marginLeft: '-2px',
-    },
-  },
-  imageCard: {
-    margin: "auto",
-    maxWidth: 520,
-    minHeight: 420,
-    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(249, 251, 248, 0.98) 100%)',
-    backdropFilter: 'blur(25px)',
-    boxShadow: '0 24px 72px rgba(0,0,0,0.18), 0 4px 16px rgba(76, 175, 80, 0.15), inset 0 1px 0 rgba(255,255,255,0.9)',
-    borderRadius: '32px',
-    transition: "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-    overflow: "hidden",
-    border: '3px solid transparent',
-    backgroundImage: 'linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(249, 251, 248, 0.98)), linear-gradient(135deg, #4caf50 0%, #66bb6a 25%, #81c784 50%, #aed581 75%, #4caf50 100%)',
-    backgroundOrigin: 'border-box',
-    backgroundClip: 'padding-box, border-box',
-    position: 'relative',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      borderRadius: '32px',
-      padding: '3px',
-      background: 'linear-gradient(135deg, #4caf50, #66bb6a, #81c784, #aed581)',
-      WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-      WebkitMaskComposite: 'xor',
-      maskComposite: 'exclude',
-      opacity: 0.5,
-      animation: 'borderRotate 5s linear infinite',
-    },
-    '&:hover': {
-      transform: "translateY(-16px) scale(1.02)",
-      boxShadow: '0 32px 96px rgba(76, 175, 80, 0.35), 0 8px 32px rgba(102, 187, 106, 0.25), inset 0 1px 0 rgba(255,255,255,1)',
-      '&::before': {
-        opacity: 1,
-      },
-    },
-  },
-  imageCardEmpty: {
-    minHeight: 300,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  noImage: {
-    margin: "auto",
-    width: 400,
-    height: "400 !important",
-  },
-  input: {
-    display: 'none',
-  },
-  uploadIcon: {
-    background: 'white',
-  },
-  tableContainer: {
-    backgroundColor: 'transparent',
-    boxShadow: 'none',
-    margin: "16px 0",
-  },
-  table: {
-    backgroundColor: 'transparent',
-    minWidth: 200,
-  },
-  tableHead: {
-    backgroundColor: '#f8f9fa',
-  },
-  tableRow: {
-    '&:nth-of-type(odd)': {
-      backgroundColor: '#f8f9fa',
-    },
-    '&:hover': {
-      backgroundColor: '#e3f2fd',
-    },
-  },
-  tableCell: {
-    fontSize: '18px',
-    fontWeight: 600,
-    color: '#2c3e50',
-    padding: '16px',
-    borderBottom: '1px solid #e0e0e0',
-  },
-  tableCell1: {
-    fontSize: '14px',
-    fontWeight: 700,
-    color: '#546e7a',
-    padding: '12px 16px',
-    backgroundColor: '#f5f5f5',
-    borderBottom: '2px solid #e0e0e0',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  },
-  tableBody: {
-    backgroundColor: 'transparent',
-  },
-  text: {
-    color: 'white !important',
-    textAlign: 'center',
-    fontWeight: 500,
-  },
-  buttonGrid: {
-    maxWidth: "500px",
-    width: "100%",
-    marginTop: "24px",
-  },
-  analyzeButton: {
-    width: "100%",
-    borderRadius: "16px",
-    padding: "16px 32px",
-    color: "#ffffff",
-    fontSize: "16px",
-    fontWeight: 700,
-    textTransform: "none",
-    background: "linear-gradient(135deg, #4caf50 0%, #66bb6a 50%, #81c784 100%)",
-    backgroundSize: "200% 100%",
-    boxShadow: "0 6px 20px rgba(76, 175, 80, .4), inset 0 1px 0 rgba(255,255,255,0.3)",
-    border: "2px solid rgba(255, 255, 255, 0.3)",
-    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-    position: "relative",
-    overflow: "hidden",
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: '-100%',
-      width: '100%',
-      height: '100%',
-      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-      transition: 'left 0.5s',
-    },
-    '&:hover': {
-      background: "linear-gradient(135deg, #388e3c 0%, #4caf50 50%, #66bb6a 100%)",
-      backgroundPosition: "100% 0",
-      boxShadow: "0 8px 28px rgba(76, 175, 80, .6), inset 0 1px 0 rgba(255,255,255,0.4)",
-      transform: "translateY(-3px) scale(1.02)",
-      '&::before': {
-        left: '100%',
-      },
-    },
-    '&:active': {
-      transform: "translateY(-1px) scale(1.01)",
-    },
-  },
-  detail: {
-    background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%)',
-    backdropFilter: 'blur(20px)',
-    display: 'flex',
-    justifyContent: 'center',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: "40px",
-    borderRadius: "0 0 30px 30px",
-    borderTop: "2px solid rgba(76, 175, 80, 0.2)",
-    boxShadow: 'inset 0 2px 8px rgba(76, 175, 80, 0.1)',
-  },
-  appbar: {
-    background: "linear-gradient(135deg, rgba(46, 125, 50, 0.98) 0%, rgba(56, 142, 60, 0.98) 50%, rgba(76, 175, 80, 0.98) 100%)",
-    backdropFilter: "blur(25px)",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.1)",
-    color: 'white',
-    height: "90px",
-    justifyContent: "center",
-    borderBottom: "2px solid rgba(255,255,255,0.15)",
-  },
-  toolbar: {
-    height: "90px",
-    padding: "0 40px",
-    maxWidth: '1400px',
-    width: '100%',
-    margin: '0 auto',
-  },
-  title: {
-    fontSize: "20px",
-    fontWeight: 800,
-    fontFamily: "'Inter', 'Poppins', sans-serif",
-    letterSpacing: "0.3px",
-    lineHeight: 1.2,
-  },
-  logoContainer: {
-    background: 'white',
-    borderRadius: '14px',
-    padding: '6px',
-    boxShadow: '0 8px 24px rgba(0,0,0,0.2), 0 0 0 3px rgba(255,255,255,0.2)',
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      transform: 'translateY(-2px)',
-      boxShadow: '0 12px 32px rgba(0,0,0,0.3), 0 0 0 3px rgba(255,255,255,0.3)',
-    },
-  },
-  logo: {
-    width: 56,
-    height: 56,
-    border: 'none',
-  },
-  loader: {
-    color: '#2196f3',
-    marginBottom: "16px",
-  },
-  loadingText: {
-    color: '#546e7a',
-    fontWeight: 500,
-    fontSize: '18px',
-  },
-  dropzoneContainer: {
-    padding: "56px 40px",
-    minHeight: "400px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "linear-gradient(135deg, rgba(248,250,252,0.98) 0%, rgba(241,245,249,0.98) 50%, rgba(237,242,250,0.98) 100%)",
-    backdropFilter: "blur(20px)",
-    borderRadius: "28px",
-    margin: "20px",
-    boxShadow: 'inset 0 2px 20px rgba(76, 175, 80, 0.08)',
-  },
-  confidenceHigh: {
-    color: '#4caf50',
-    fontWeight: 700,
-  },
-  confidenceMedium: {
-    color: '#ff9800',
-    fontWeight: 700,
-  },
-  confidenceLow: {
-    color: '#f44336',
-    fontWeight: 700,
-  },
-  resultCard: {
-    background: "linear-gradient(135deg, rgba(232,245,232,0.98) 0%, rgba(241,248,233,0.98) 50%, rgba(225,245,254,0.98) 100%)",
-    backdropFilter: "blur(25px)",
-    borderRadius: "24px",
-    padding: "40px",
-    margin: "24px 0",
-    border: "3px solid transparent",
-    backgroundImage: 'linear-gradient(135deg, rgba(232,245,232,0.98), rgba(241,248,233,0.98)), linear-gradient(135deg, #4caf50, #8bc34a, #4caf50)',
-    backgroundOrigin: 'border-box',
-    backgroundClip: 'padding-box, border-box',
-    boxShadow: "0 16px 56px rgba(76, 175, 80, 0.3), 0 4px 16px rgba(139, 195, 74, 0.2)",
-    position: 'relative',
-    animation: 'resultGlow 2s ease-in-out infinite alternate',
-  },
-  diseaseLabel: {
-    fontSize: "22px",
-    fontWeight: 800,
-    fontFamily: "'Inter', 'Poppins', sans-serif",
-    color: "#1b5e20",
-    marginBottom: "12px",
-    textAlign: "center",
-    letterSpacing: "0.5px",
-    textTransform: "uppercase",
-  },
-  diseaseInfoCard: {
-    background: "linear-gradient(135deg, rgba(255,255,255,0.99) 0%, rgba(248,251,248,0.99) 100%)",
-    borderRadius: "28px",
-    padding: "36px",
-    marginTop: "32px",
-    border: "3px solid rgba(76, 175, 80, 0.2)",
-    boxShadow: "0 12px 48px rgba(76, 175, 80, 0.25), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)",
-    animation: "slideInUp 0.6s ease-out",
-    position: 'relative',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: '5px',
-      background: 'linear-gradient(90deg, #2e7d32 0%, #4caf50 50%, #66bb6a 100%)',
-      borderRadius: '28px 28px 0 0',
-    },
-  },
-  infoSection: {
-    marginBottom: "16px",
-    padding: "20px 24px",
-    background: "linear-gradient(135deg, rgba(248, 251, 248, 0.95) 0%, rgba(240, 248, 245, 0.95) 100%)",
-    borderRadius: "16px",
-    border: "1.5px solid rgba(76, 175, 80, 0.2)",
-    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-    boxShadow: "0 2px 8px rgba(76, 175, 80, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)",
-    '&:hover': {
-      background: "linear-gradient(135deg, rgba(248, 251, 248, 1) 0%, rgba(240, 248, 245, 1) 100%)",
-      boxShadow: "0 6px 20px rgba(76, 175, 80, 0.15), inset 0 1px 0 rgba(255,255,255,1)",
-      transform: "translateY(-2px)",
-      borderColor: "rgba(76, 175, 80, 0.35)",
-    },
-    '&:last-child': {
-      marginBottom: 0,
-    },
-  },
-  infoTitle: {
-    fontSize: "16px",
-    fontWeight: 700,
-    fontFamily: "'Inter', 'Poppins', sans-serif",
-    color: "#1b5e20",
-    textTransform: "uppercase",
-    letterSpacing: "1.2px",
-    marginBottom: "12px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    borderBottom: "2.5px solid #4caf50",
-    paddingBottom: "10px",
-    background: "linear-gradient(90deg, #1b5e20 0%, #2e7d32 100%)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-  },
-  infoText: {
-    fontSize: "15px",
-    fontFamily: "'Inter', 'Roboto', sans-serif",
-    color: "#263238",
-    lineHeight: "1.8",
-    letterSpacing: "0.4px",
-    fontWeight: 500,
-  },
-  healthyBadge: {
-    background: "linear-gradient(135deg, #4caf50 0%, #66bb6a 100%)",
-    color: "white",
-    padding: "8px 20px",
-    borderRadius: "24px",
-    fontSize: "14px",
-    fontWeight: 600,
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "8px",
-    marginBottom: "16px",
-    boxShadow: "0 4px 12px rgba(76,175,80,0.3)",
-  },
-  diseasedBadge: {
-    background: "linear-gradient(135deg, #f44336 0%, #e57373 100%)",
-    color: "white",
-    padding: "8px 20px",
-    borderRadius: "24px",
-    fontSize: "14px",
-    fontWeight: 600,
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "8px",
-    marginBottom: "16px",
-    boxShadow: "0 4px 12px rgba(244,67,54,0.3)",
-  },
-  progressBar: {
-    width: "100%",
-    height: "8px",
-    backgroundColor: "#e0e0e0",
-    borderRadius: "8px",
-    overflow: "hidden",
-    marginTop: "12px",
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: "8px",
-    transition: "width 0.8s ease-out, background-color 0.3s ease",
-  },
-  tooltip: {
-    position: "relative",
-    display: "inline-block",
-    cursor: "help",
-  },
-}));
 export const ImageUpload = () => {
-  const classes = useStyles();
-  const [selectedFile, setSelectedFile] = useState();
-  const [preview, setPreview] = useState();
-  const [data, setData] = useState();
-  const [image, setImage] = useState(false);
-  const [isLoading, setIsloading] = useState(false);
-  let confidence = 0;
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
+  const fileInputRef = useRef(null);
 
-  const sendFile = async () => {
-    if (image) {
-      let formData = new FormData();
-      formData.append("file", selectedFile);
+  const onDragOver = (e) => {
+    e.preventDefault();
+    setIsDragActive(true);
+  };
+
+  const onDragLeave = () => {
+    setIsDragActive(false);
+  };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    setIsDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileSelection(e.dataTransfer.files[0]);
+    }
+  };
+
+  const onFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFileSelection(e.target.files[0]);
+    }
+  };
+
+  const handleFileSelection = (file) => {
+    setData(null);
+    setSelectedFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    setPreview(objectUrl);
+  };
+
+  useEffect(() => {
+    if (!preview) return;
+
+    const analyzeImage = async () => {
+      setIsLoading(true);
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
       try {
-        let res = await axios({
-          method: "post",
-          url: process.env.REACT_APP_API_URL || "http://localhost:8000/predict",
-          data: formData,
-        });
-        if (res.status === 200) {
-          setData(res.data);
+        const response = await axios.post(
+          process.env.REACT_APP_API_URL || 'http://localhost:8000/predict',
+          formData
+        );
+        if (response.status === 200) {
+          setData(response.response || response.data);
         }
       } catch (error) {
-        console.error("Error predicting disease:", error);
-        // You could add error state handling here
+        console.error('Error analyzing image:', error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsloading(false);
-    }
-  }
+    };
 
-  const clearData = () => {
-    setData(null);
-    setImage(false);
+    analyzeImage();
+  }, [preview]); // eslint-disable-line
+
+  const triggerSelectFile = () => {
+    fileInputRef.current.click();
+  };
+
+  const clearUpload = () => {
     setSelectedFile(null);
     setPreview(null);
+    setData(null);
   };
 
-  useEffect(() => {
-    if (!selectedFile) {
-      setPreview(undefined);
-      return;
-    }
-    const objectUrl = URL.createObjectURL(selectedFile);
-    setPreview(objectUrl);
-  }, [selectedFile]);
-
-  useEffect(() => {
-    if (!preview) {
-      return;
-    }
-    setIsloading(true);
-    sendFile();
-  }, [preview]);
-
-  const onSelectFile = (files) => {
-    if (!files || files.length === 0) {
-      setSelectedFile(undefined);
-      setImage(false);
-      setData(undefined);
-      return;
-    }
-    setSelectedFile(files[0]);
-    setData(undefined);
-    setImage(true);
+  const downloadReport = () => {
+    if (!data) return;
+    const diseaseName = DISEASE_DETAILS[data.class]?.name || data.class;
+    const content = `TomoVision Diagnostic Report\nDate: ${new Date().toLocaleDateString()}\nDiagnosed Disease: ${diseaseName}\nConfidence: ${(parseFloat(data.confidence) * 100).toFixed(2)}%\nSeverity: ${DISEASE_DETAILS[data.class]?.severityText}\n\nRecommended Actions:\n${DISEASE_DETAILS[data.class]?.treatment}\n\nPrevention Plan:\n${DISEASE_DETAILS[data.class]?.prevention}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `TomoVision-Report-${diseaseName.replace(/\s+/g, '-')}.txt`;
+    link.click();
   };
 
-  if (data) {
-    confidence = (parseFloat(data.confidence) * 100).toFixed(2);
-  }
-
-  const getConfidenceClass = () => {
-    const conf = parseFloat(confidence);
-    if (conf >= 80) return classes.confidenceHigh;
-    if (conf >= 60) return classes.confidenceMedium;
-    return classes.confidenceLow;
-  };
-
-  const formatDiseaseLabel = (label) => {
-    return label.replace(/Tomato_/g, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  };
+  // Safe prediction confidence checks
+  const confidencePercent = data ? (parseFloat(data.confidence) * 100).toFixed(1) : 0;
+  const currentDisease = data ? (DISEASE_DETAILS[data.class] || {
+    name: data.class,
+    severity: 'medium',
+    severityText: 'Diagnosed',
+    icon: '🍃',
+    description: 'Pathogen detected.',
+    symptoms: 'Not specified.',
+    treatment: 'Inspect plant.',
+    prevention: 'Clean greenhouse tools.',
+    comparison: 'Compare with typical blights.'
+  }) : null;
+  const severity = currentDisease ? currentDisease.severity : 'healthy';
 
   return (
-    <React.Fragment>
-      <AppBar position="static" className={classes.appbar}>
-        <Toolbar className={classes.toolbar}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div className={classes.logoContainer}>
-              <Avatar src="/cblogo.PNG.png" className={classes.logo}></Avatar>
-            </div>
-            <div>
-              <div style={{
-                fontSize: '11px',
-                fontWeight: 700,
-                letterSpacing: '2px',
-                color: 'rgba(255,255,255,0.9)',
-                marginBottom: '2px'
-              }}>
-                🌱 TOMO VISION
-              </div>
-              <Typography className={classes.title} variant="h5" noWrap>
-                Tomato Disease Detection
-              </Typography>
+    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+      {/* ── STICKY NAVBAR ── */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">🍅</span>
+            <div className="leading-tight">
+              <span className="block text-slate-900 font-display font-extrabold text-lg tracking-tight">TomoVision</span>
+              <span className="block text-[10px] text-brand-600 font-bold uppercase tracking-wider">Precision AgriTech</span>
             </div>
           </div>
-          <div className={classes.grow} />
-          <Chip
-            icon={<AutorenewIcon style={{ animation: 'spin 3s linear infinite' }} />}
-            label="AI-Powered"
-            style={{
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%)',
-              backdropFilter: 'blur(10px)',
-              color: 'white',
-              fontWeight: 700,
-              fontSize: '13px',
-              padding: '6px 14px',
-              height: '36px',
-              border: '1px solid rgba(255,255,255,0.3)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              transition: 'all 0.3s ease',
-            }}
-          />
-          <Chip
-            label="Ready"
-            style={{
-              background: 'rgba(139, 195, 74, 0.3)',
-              backdropFilter: 'blur(10px)',
-              color: 'white',
-              fontWeight: 700,
-              fontSize: '13px',
-              padding: '6px 14px',
-              height: '36px',
-              marginLeft: '10px',
-              border: '1px solid rgba(255,255,255,0.3)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            }}
-          />
-        </Toolbar>
-      </AppBar>
-      <Container maxWidth={false} className={classes.mainContainer} disableGutters={true}>
-        {!image && !data && (
-          <Fade in={true} timeout={800}>
-            <div className={classes.heroBanner}>
-              <Typography variant="h3" className={classes.heroTitle}>
-                AI-Powered Disease Detection
-              </Typography>
-              <Typography variant="h6" className={classes.heroSubtitle}>
-                Get instant, accurate diagnosis for your tomato plants
-              </Typography>
-              <Grid container spacing={3} style={{ marginTop: '32px', maxWidth: '900px', margin: '32px auto 0' }}>
-                <Grid item xs={12} sm={4}>
-                  <div className={classes.featureCard}>
-                    <div className={classes.featureIcon}>🎯</div>
-                    <Typography className={classes.featureTitle}>High Accuracy</Typography>
-                    <Typography className={classes.featureText}>95%+ detection rate</Typography>
-                  </div>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <div className={classes.featureCard}>
-                    <div className={classes.featureIcon}>⚡</div>
-                    <Typography className={classes.featureTitle}>Instant Results</Typography>
-                    <Typography className={classes.featureText}>Analysis in seconds</Typography>
-                  </div>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <div className={classes.featureCard}>
-                    <div className={classes.featureIcon}>🌱</div>
-                    <Typography className={classes.featureTitle}>Expert Care Tips</Typography>
-                    <Typography className={classes.featureText}>Treatment guidance</Typography>
-                  </div>
-                </Grid>
-              </Grid>
+          
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+            <a href="#how-it-works" className="hover:text-brand-600 transition-colors">How It Works</a>
+            <a href="#features" className="hover:text-brand-600 transition-colors">Features</a>
+            <a href="#library" className="hover:text-brand-600 transition-colors">Disease Library</a>
+            <a href="#about" className="hover:text-brand-600 transition-colors">About</a>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 border border-brand-100 text-xs font-semibold text-brand-700">
+              <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />
+              SaaS Engine Live
             </div>
-          </Fade>
-        )}
-        <Grid
-          className={classes.gridContainer}
-          container
-          direction="row"
-          justifyContent="center"
-          alignItems="center"
-          spacing={3}
-        >
-          <Grid item xs={12} md={8} lg={6}>
-            {!image && <Fade in={true} timeout={600}>
-              <Paper className={classes.diseasesCard}>
-                <Typography variant="h6" className={classes.diseasesTitle}>
-                  🔬 Detectable Conditions
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Typography className={classes.diseaseItem}>• Tomato Bacterial Spot</Typography>
-                    <Typography className={classes.diseaseItem}>• Tomato Early Blight</Typography>
-                    <Typography className={classes.diseaseItem}>• Tomato Late Blight</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography className={classes.diseaseItem}>• Tomato Leaf Mold</Typography>
-                    <Typography className={classes.diseaseItem}>• Tomato Target Spot</Typography>
-                    <Typography className={classes.diseaseItem}>• Healthy Tomato</Typography>
-                  </Grid>
-                </Grid>
-              </Paper>
-            </Fade>}
-            <Zoom in={true} timeout={500}>
-              <Card className={`${classes.imageCard} ${!image ? classes.imageCardEmpty : ''}`}>
-                {image && <Fade in={true} timeout={800}>
-                  <CardActionArea>
-                    <CardMedia
-                      className={classes.media}
-                      image={preview}
-                      component="image"
-                      title="Uploaded Tomato Leaf"
-                    />
-                  </CardActionArea>
-                </Fade>
-                }
-                {!image && <CardContent className={classes.dropzoneContainer}>
-                  <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>📸</div>
-                    <Typography variant="h6" style={{
-                      color: '#2e7d32',
-                      fontWeight: 700,
-                      marginBottom: '8px'
-                    }}>
-                      Upload Leaf Image
-                    </Typography>
-                    <Typography variant="body2" style={{
-                      color: '#546e7a',
-                      fontSize: '14px',
-                      maxWidth: '380px',
-                      margin: '0 auto'
-                    }}>
-                      Drag and drop or click to select a clear image of a tomato leaf
-                    </Typography>
+            <a
+              href="#demo"
+              className="hidden sm:inline-flex items-center justify-center px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-xs font-bold text-white shadow-lg shadow-brand-600/20 transition-all hover:scale-[1.02]"
+            >
+              Launch Analyzer
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      {/* ── HERO SECTION ── */}
+      <section className="relative overflow-hidden pt-20 pb-32 bg-slate-900 text-white">
+        {/* Farm Background Image with custom overlay */}
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?auto=format&fit=crop&q=80&w=1600')] bg-cover bg-center mix-blend-overlay opacity-25" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/60 to-slate-900" />
+        
+        {/* Floating background gradient light */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-brand-500/10 rounded-full blur-[120px] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/80 text-xs font-semibold text-brand-300 tracking-wide mb-6"
+          >
+            <Sparkles className="w-4 h-4 text-lime-400" /> Deep Learning Crop Diagnostics
+          </motion.div>
+          
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-4xl sm:text-6xl font-display font-extrabold tracking-tight max-w-4xl mx-auto leading-[1.05]"
+          >
+            AI-Powered <span className="bg-gradient-to-r from-brand-400 via-brand-300 to-lime-300 bg-clip-text text-transparent">Tomato Disease Detection</span>
+          </motion.h1>
+          
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-lg sm:text-xl text-slate-350 max-w-2xl mx-auto mt-6 leading-relaxed"
+          >
+            Instantly identify tomato leaf pathogens using advanced computer vision models. Get immediate diagnosis and customized treatment recommendations.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mt-10 flex flex-wrap justify-center gap-4"
+          >
+            <a
+              href="#demo"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-brand-500 hover:bg-brand-600 font-bold text-sm text-white shadow-xl shadow-brand-500/25 transition-all hover:scale-[1.02]"
+            >
+              Get Started Free <ChevronRight className="w-4 h-4" />
+            </a>
+            <a
+              href="#library"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-750 font-bold text-sm text-white border border-slate-700/80 transition-colors"
+            >
+              Browse Pathogens
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── STATS SECTION ── */}
+      <section className="-mt-16 relative z-20 max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'Diagnostic Accuracy', value: '95%+', desc: 'Validated on crop datasets' },
+            { label: 'Response Time', value: '<2s', desc: 'Accelerated cloud inference' },
+            { label: 'Detectable Pathogens', value: '6 Types', desc: 'Blights, spots, molds' },
+            { icon: '🌿', value: 'Precision', desc: 'Precision agriculture SaaS' },
+          ].map((stat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all"
+            >
+              <div className="text-3xl font-display font-extrabold text-slate-900 mb-1">
+                {stat.value}
+              </div>
+              <div className="text-sm font-semibold text-slate-800 mb-1">{stat.label}</div>
+              <div className="text-xs text-slate-500">{stat.desc}</div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── DEMO / UPLOAD CENTERPIECE ── */}
+      <section id="demo" className="py-24 max-w-7xl mx-auto px-6 scroll-mt-20">
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <h2 className="text-base text-brand-600 font-bold tracking-wide uppercase mb-3">Live Interactive Analyzer</h2>
+          <p className="text-3xl sm:text-4xl font-display font-bold text-slate-900 tracking-tight">
+            Diagnose Leaf Health Instantly
+          </p>
+          <p className="text-slate-500 mt-3">
+            Upload or drag-and-drop a leaf image. Our neural network will classify it and output a complete treatment report.
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto bg-white border border-slate-200/80 rounded-3xl overflow-hidden shadow-premium">
+          {/* Card Header */}
+          <div className="bg-slate-50 px-8 py-5 border-b border-slate-200/80 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-50 border border-brand-100 text-brand-600">
+                🚀
+              </span>
+              <div>
+                <span className="block font-semibold text-sm text-slate-800 leading-none">Diagnostic Console</span>
+                <span className="block text-[11px] text-slate-500 mt-1">Status: Ready</span>
+              </div>
+            </div>
+            
+            {selectedFile && (
+              <button
+                onClick={clearUpload}
+                className="text-xs font-semibold text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg border border-rose-100 transition-colors"
+              >
+                Clear Image
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            {/* LEFT SIDE: Image Selection & Scanning */}
+            <div className="p-8 border-r border-slate-200/60 flex flex-col justify-center min-h-[380px]">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={onFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+
+              {!selectedFile ? (
+                <div
+                  onDragOver={onDragOver}
+                  onDragLeave={onDragLeave}
+                  onDrop={onDrop}
+                  onClick={triggerSelectFile}
+                  className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-8 cursor-pointer transition-all duration-300 min-h-[280px] ${
+                    isDragActive
+                      ? 'border-brand-500 bg-brand-50/40 shadow-glow-sm'
+                      : 'border-slate-300 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="w-16 h-16 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 mb-4 shadow-sm">
+                    <UploadCloud className="w-8 h-8" />
                   </div>
-                  <DropzoneArea
-                    acceptedFiles={['image/*']}
-                    dropzoneText={""}
-                    onChange={onSelectFile}
-                    maxFileSize={5000000}
-                    showFileNames={true}
-                    showAlerts={true}
-                    filesLimit={1}
-                    dropzoneClass={classes.customDropzone}
+                  <h3 className="font-bold text-slate-800 text-sm mb-1">Upload Tomato Leaf</h3>
+                  <p className="text-xs text-slate-500 text-center max-w-[200px] leading-relaxed">
+                    Drag and drop file here, or click to browse
+                  </p>
+                  
+                  <div className="mt-6 flex gap-2">
+                    <span className="px-2 py-1 bg-slate-200/80 rounded text-[10px] font-semibold text-slate-600">JPG</span>
+                    <span className="px-2 py-1 bg-slate-200/80 rounded text-[10px] font-semibold text-slate-600">PNG</span>
+                    <span className="px-2 py-1 bg-slate-200/80 rounded text-[10px] font-semibold text-slate-600">WEBP</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative rounded-2xl overflow-hidden shadow-inner bg-slate-900 border border-slate-800 flex items-center justify-center h-full min-h-[280px]">
+                  <img
+                    src={preview}
+                    alt="Upload Preview"
+                    className="max-h-[300px] object-contain w-full"
                   />
-                  <div style={{
-                    marginTop: '28px',
-                    padding: '16px 24px',
-                    background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.08), rgba(139, 195, 74, 0.08))',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(76, 175, 80, 0.2)'
-                  }}>
-                    <Typography variant="body2" style={{
-                      color: '#2e7d32',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      marginBottom: '8px'
-                    }}>
-                      💡 Pro Tips for Best Results:
-                    </Typography>
-                    <Typography variant="body2" style={{
-                      color: '#546e7a',
-                      fontSize: '12px',
-                      lineHeight: 1.8
-                    }}>
-                      • Use good natural or artificial lighting<br />
-                      • Focus on a single leaf for clarity<br />
-                      • Capture both sides if symptoms vary<br />
-                      • Avoid blurry or out-of-focus images
-                    </Typography>
-                  </div>
-                </CardContent>}
-                {isLoading && !data && image && <CardContent className={classes.detail}>
-                  <div className={classes.loadingContainer}>
-                    <CircularProgress size={80} thickness={4} style={{ color: '#4caf50' }} />
-                    <Typography className={classes.loadingTitle}>
-                      Analyzing Leaf Image...
-                    </Typography>
-                    <Typography className={classes.loadingSubtitle}>
-                      Our AI model is examining the leaf for diseases
-                    </Typography>
-                    <div className={classes.loadingSteps}>
-                      <div className={classes.loadingStep}>
-                        <div className={classes.loadingStepIcon}>✓</div>
-                        <Typography className={classes.loadingStepText}>Image uploaded</Typography>
-                      </div>
-                      <div className={classes.loadingStep}>
-                        <div className={classes.loadingStepIcon}>⏳</div>
-                        <Typography className={classes.loadingStepText}>Processing features</Typography>
-                      </div>
-                      <div className={classes.loadingStep}>
-                        <div className={classes.loadingStepIconPending}>•</div>
-                        <Typography className={classes.loadingStepTextPending}>Generating report</Typography>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>}
-                {data && <CardContent className={classes.detail}>
-                  <div className={classes.resultCard}>
-                    <div className={data.class === "Tomato_healthy" ? classes.healthyBadge : classes.diseasedBadge}>
-                      {data.class === "Tomato_healthy" ? "✓ Healthy Plant" : "⚠ Disease Detected"}
-                    </div>
-                    <Typography className={classes.diseaseLabel}>
-                      {formatDiseaseLabel(data.class)}
-                    </Typography>
-                    <TableContainer component={Paper} className={classes.tableContainer}>
-                      <Table className={classes.table} size="small" aria-label="prediction results">
-                        <TableHead className={classes.tableHead}>
-                          <TableRow className={classes.tableRow}>
-                            <TableCell className={classes.tableCell1}>Classification</TableCell>
-                            <TableCell align="right" className={classes.tableCell1}>Confidence</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody className={classes.tableBody}>
-                          <TableRow className={classes.tableRow}>
-                            <TableCell component="th" scope="row" className={classes.tableCell}>
-                              {formatDiseaseLabel(data.class)}
-                            </TableCell>
-                            <TableCell align="right" className={`${classes.tableCell} ${getConfidenceClass()}`}>
-                              {confidence}%
-                            </TableCell>
-                          </TableRow>
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                    <div className={classes.progressBar}>
-                      <div
-                        className={classes.progressFill}
-                        style={{
-                          width: `${confidence}%`,
-                          backgroundColor: parseFloat(confidence) >= 80 ? '#4caf50' :
-                            parseFloat(confidence) >= 60 ? '#ff9800' : '#f44336'
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {diseaseInfo[data.class] && (
-                    <div className={classes.diseaseInfoCard}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                          <div className={classes.infoSection}>
-                            <Typography className={classes.infoTitle}>
-                              📋 Description
-                            </Typography>
-                            <Typography className={classes.infoText}>
-                              {diseaseInfo[data.class].description}
-                            </Typography>
-                          </div>
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                          <div className={classes.infoSection}>
-                            <Typography className={classes.infoTitle}>
-                              🔍 Key Symptoms
-                            </Typography>
-                            <Typography className={classes.infoText}>
-                              {diseaseInfo[data.class].symptoms}
-                            </Typography>
-                          </div>
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                          <div className={classes.infoSection}>
-                            <Typography className={classes.infoTitle}>
-                              💊 Treatment Plan
-                            </Typography>
-                            <Typography className={classes.infoText}>
-                              {diseaseInfo[data.class].treatment}
-                            </Typography>
-                          </div>
-                        </Grid>
-                      </Grid>
-                    </div>
+                  {isLoading && (
+                    <>
+                      {/* Scanning animation overlay */}
+                      <div className="absolute inset-0 bg-brand-500/10 pointer-events-none" />
+                      <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-brand-400 to-transparent shadow-[0_0_20px_#22c55e] scan-line" />
+                    </>
                   )}
+                </div>
+              )}
+            </div>
 
-                  {/* Action Button inside card */}
-                  <div style={{ marginTop: '24px', padding: '0 16px 16px' }}>
-                    <ColorButton
-                      variant="contained"
-                      className={classes.analyzeButton}
-                      color="primary"
-                      component="span"
-                      size="large"
-                      onClick={clearData}
-                      startIcon={<RefreshIcon style={{ fontSize: '24px' }} />}
-                      fullWidth
-                    >
-                      Analyze Another Leaf
-                    </ColorButton>
-                  </div>
-                </CardContent>}
-                {isLoading && <CardContent className={classes.detail}>
-                  <CircularProgress size={60} className={classes.loader} />
-                  <Typography className={classes.loadingText} variant="h6" noWrap>
-                    🔬 Analyzing leaf image...
-                  </Typography>
-                  <Typography variant="body2" style={{ color: '#9e9e9e', marginTop: '8px' }}>
-                    Please wait while our AI processes your image
-                  </Typography>
-                  <div style={{
-                    marginTop: '20px',
-                    display: 'flex',
-                    gap: '16px',
-                    justifyContent: 'center',
-                    flexWrap: 'wrap'
-                  }}>
-                    <Chip label="🧠 Deep Learning" size="small" style={{ backgroundColor: '#e3f2fd' }} />
-                    <Chip label="🔍 Pattern Recognition" size="small" style={{ backgroundColor: '#f3e5f5' }} />
-                    <Chip label="✨ High Accuracy" size="small" style={{ backgroundColor: '#e8f5e9' }} />
-                  </div>
-                </CardContent>}
-              </Card>
-            </Zoom>
-          </Grid>
-        </Grid>
+            {/* RIGHT SIDE: Diagnostic Output / Waiting state */}
+            <div className="p-8 bg-slate-50/60 flex flex-col justify-center">
+              <AnimatePresence mode="wait">
+                {!selectedFile && (
+                  <motion.div
+                    key="empty"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="text-center py-8"
+                  >
+                    <div className="text-4xl mb-4">🩺</div>
+                    <h3 className="font-bold text-slate-800 text-sm mb-1">Awaiting Leaf Upload</h3>
+                    <p className="text-xs text-slate-500 max-w-[260px] mx-auto leading-relaxed">
+                      Upload an image on the left. The crop analyzer will automatically run model inference.
+                    </p>
+                  </motion.div>
+                )}
 
-        {/* Info Guide Section - shown when no image is uploaded */}
-        {!image && !data && (
-          <Container maxWidth="lg" style={{ position: 'relative', zIndex: 1 }}>
-            <InfoGuide />
-          </Container>
-        )}
-      </Container>
+                {isLoading && (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-6 py-4"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full border-2 border-slate-200 border-t-brand-500 animate-spin" />
+                      <span className="font-semibold text-sm text-slate-800">Processing diagnosis...</span>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {[
+                        'Analyzing leaf vein patterns...',
+                        'Calculating classification weights...',
+                        'Retrieving pathogen treatment records...'
+                      ].map((step, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-xs text-slate-500">
+                          <CheckCircle className="w-3.5 h-3.5 text-brand-500" />
+                          {step}
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {data && !isLoading && (
+                  <motion.div
+                    key="results"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-6"
+                  >
+                    {/* Severity Indicator Banner */}
+                    <div className={`p-4 rounded-xl border flex items-center gap-3.5 ${SEVERITY_STYLES[severity]?.text}`}>
+                      <span className="text-2xl">{currentDisease.icon}</span>
+                      <div>
+                        <div className="font-bold text-sm text-slate-900 leading-tight">{currentDisease.name}</div>
+                        <div className="text-[11px] font-bold uppercase tracking-wider mt-0.5">{currentDisease.severityText}</div>
+                      </div>
+                    </div>
+
+                    {/* Confidence Meter */}
+                    <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-sm">
+                      <div className="flex justify-between items-center text-xs mb-1.5 font-bold tracking-tight">
+                        <span className="text-slate-500">Model Confidence</span>
+                        <span className="text-slate-900">{confidencePercent}%</span>
+                      </div>
+                      <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-1000 ${SEVERITY_STYLES[severity]?.bar}`}
+                          style={{ width: `${confidencePercent}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Quick Treatment Summary */}
+                    <div className="space-y-4 text-xs">
+                      <div className="p-3 bg-white border border-slate-200/60 rounded-xl">
+                        <div className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-[10px] text-brand-600">Recommended Treatment</div>
+                        <p className="text-slate-600 leading-relaxed font-medium">{currentDisease.treatment}</p>
+                      </div>
+                      <div className="p-3 bg-white border border-slate-200/60 rounded-xl">
+                        <div className="font-bold text-slate-900 mb-1 uppercase tracking-wider text-[10px] text-lime-600">Prevention Plan</div>
+                        <p className="text-slate-600 leading-relaxed font-medium">{currentDisease.prevention}</p>
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        onClick={downloadReport}
+                        className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 font-bold text-xs text-white transition-colors"
+                      >
+                        <Download className="w-3.5 h-3.5" /> Download Report
+                      </button>
+                      <button
+                        onClick={clearUpload}
+                        className="inline-flex items-center justify-center w-12 h-12 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors text-slate-500"
+                        title="Analyze Another"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <InfoGuide />
+
+      {/* ── CORE FEATURES ── */}
+      <section id="features" className="py-24 bg-slate-50 border-t border-slate-200/60">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-20">
+            <h2 className="text-base text-brand-600 font-bold tracking-wide uppercase mb-3">Core Capabilities</h2>
+            <p className="text-3xl sm:text-4xl font-display font-bold text-slate-900 tracking-tight">
+              Enterprise Crop Intelligence
+            </p>
+            <div className="h-1 w-20 bg-brand-500 mx-auto mt-4 rounded-full" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: Layers,
+                title: 'Deep Learning Classifier',
+                desc: 'Utilizes a fine-tuned EfficientNet-B0 backbone capable of extracting precise pathological features from foliage photos.'
+              },
+              {
+                icon: Zap,
+                title: 'Sub-Second Inference',
+                desc: 'Diagnostic predictions are generated in milliseconds, providing instant agricultural support right in the greenhouse.'
+              },
+              {
+                icon: Shield,
+                title: 'Actionable Ag-Advice',
+                desc: 'Every diagnosis comes with step-by-step organic/chemical treatment options and robust long-term prevention guidelines.'
+              },
+              {
+                icon: AlertTriangle,
+                title: 'Blight Severity Tags',
+                desc: 'Identifies critical threats immediately to warn growers and help contain early infection vectors.'
+              },
+              {
+                icon: Heart,
+                title: 'High Dataset Integrity',
+                desc: 'Trained on verified agricultural plant pathology datasets, minimizing false positive Healthy classifications.'
+              },
+              {
+                icon: BookOpen,
+                title: 'Developer Friendly API',
+                desc: 'Engineered as a clean microservice backend that integrates easily into existing IoT field hardware.'
+              }
+            ].map((feat, idx) => {
+              const Icon = feat.icon;
+              return (
+                <div
+                  key={idx}
+                  className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 group"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 mb-5 group-hover:bg-brand-500 group-hover:text-white transition-all duration-300">
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 font-display">{feat.title}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">{feat.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PATHOGEN LIBRARY ── */}
+      <section id="library" className="py-24 bg-white border-t border-slate-200/60 scroll-mt-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-20">
+            <h2 className="text-base text-brand-600 font-bold tracking-wide uppercase mb-3">Pathogen Library</h2>
+            <p className="text-3xl sm:text-4xl font-display font-bold text-slate-900 tracking-tight">
+              Foliage Pathogen Library
+            </p>
+            <div className="h-1 w-20 bg-brand-500 mx-auto mt-4 rounded-full" />
+            <p className="text-slate-500 mt-4 leading-relaxed">
+              Explore the detailed descriptions and symptoms of tomato leaf conditions supported by our AI model.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {Object.entries(DISEASE_DETAILS).map(([key, item]) => (
+              <div
+                key={key}
+                className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-sm hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300"
+              >
+                {/* Pathogen Header */}
+                <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-4">
+                  <span className="text-3xl">{item.icon}</span>
+                  <div>
+                    <h3 className="font-bold text-slate-900 font-display text-base leading-tight">{item.name}</h3>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className={`inline-block w-2.5 h-2.5 rounded-full ${SEVERITY_STYLES[item.severity]?.bar}`} />
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{item.severityText}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pathogen Details */}
+                <div className="p-6 space-y-4 text-xs">
+                  <div>
+                    <span className="block font-bold text-[10px] text-brand-600 uppercase tracking-wider mb-1">Diagnostic Info</span>
+                    <p className="text-slate-600 leading-relaxed font-medium">{item.description}</p>
+                  </div>
+                  
+                  <div>
+                    <span className="block font-bold text-[10px] text-slate-500 uppercase tracking-wider mb-1">Key Symptoms</span>
+                    <p className="text-slate-600 leading-relaxed font-medium">{item.symptoms}</p>
+                  </div>
+
+                  <div>
+                    <span className="block font-bold text-[10px] text-lime-600 uppercase tracking-wider mb-1">Similar Diseases</span>
+                    <p className="text-slate-600 leading-relaxed font-medium">{item.comparison}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── ABOUT SECTION ── */}
+      <section id="about" className="py-24 bg-slate-900 text-white relative overflow-hidden">
+        {/* Background visual decorations */}
+        <div className="absolute top-1/2 left-10 w-96 h-96 bg-brand-600/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-lime-600/10 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="max-w-4xl mx-auto px-6 relative z-10 text-center space-y-8">
+          <h2 className="text-base text-brand-400 font-bold tracking-wide uppercase">Enterprise Standard Diagnostic Service</h2>
+          <p className="text-3xl sm:text-4xl font-display font-extrabold tracking-tight">
+            Accelerating Precision Agriculture with Computer Vision
+          </p>
+          <p className="text-slate-400 text-sm leading-relaxed max-w-2xl mx-auto font-medium">
+            TomoVision provides growers, greenhouse managers, and agricultural researchers with immediate leaf pathogen identification. By deploying deep convolutional neural networks directly to our API gateway, we facilitate high-accuracy diagnosis without requiring complex, expensive field equipment.
+          </p>
+          <div className="flex justify-center gap-6 text-sm font-semibold text-slate-400 pt-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-brand-400" /> Fully Responsive UI
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-brand-400" /> API Access Keys
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-brand-400" /> Diagnostic Logs
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
       <Footer />
-    </React.Fragment>
+    </div>
   );
 };
+
+export default ImageUpload;
