@@ -143,16 +143,16 @@ install-mobile:
 #  DEVELOPMENT
 # =============================================================================
 
-## Launch API and Frontend dev servers (Windows  opens two cmd windows)
+## Launch API and Frontend dev servers (Windows — opens two cmd windows)
 dev:
 	@echo "[dev] Starting API and Frontend dev servers..."
-	start cmd /k "cd $(API_DIR) && ..\$(VENV_DIR)\Scripts\uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+	start cmd /k "cd $(API_DIR) && ../$(VENV_DIR)/Scripts/python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000"
 	start cmd /k "cd $(FRONTEND_DIR) && npm start"
 
 ## Run FastAPI development server on port 8000
 dev-api:
 	@echo "[dev] Starting FastAPI at $(API_URL) ..."
-	cd $(API_DIR) && ..\$(VENV_DIR)/Scripts/uvicorn main:app --reload --host 0.0.0.0 --port 8000
+	cd $(API_DIR) && ../$(VENV_DIR)/Scripts/python -m uvicorn app:app --reload --host 0.0.0.0 --port 8000
 
 ## Run React development server on port 3000
 dev-frontend:
@@ -162,7 +162,7 @@ dev-frontend:
 ## Start Expo mobile development server
 dev-mobile:
 	@echo "[dev] Starting Expo dev server..."
-	cd $(MOBILE_DIR) && npm start
+	cd $(MOBILE_DIR) && npm start -- --go
 
 
 # =============================================================================
