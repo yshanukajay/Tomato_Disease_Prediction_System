@@ -9,6 +9,9 @@ COPY frontend/package.json frontend/package-lock.json ./
 # Install dependencies
 RUN npm install
 
+# Copy config files
+COPY frontend/tailwind.config.js frontend/postcss.config.js ./
+
 # Copy frontend source
 COPY frontend/src ./src
 COPY frontend/public ./public
